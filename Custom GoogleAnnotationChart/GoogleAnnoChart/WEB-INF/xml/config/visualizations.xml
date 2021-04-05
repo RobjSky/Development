@@ -1,0 +1,5 @@
+<visualizations>
+  <visualization-list name="ajax" show-in-web="true" view-mode="51">
+    <visualization attribute-minimum="1" desc="Google Anno Chart_Bjoern" is-mojo="true" metric-minimum="1" scope="19" style-name="GoogleAnnoChart" editor-model="plugins.GoogleAnnoChart.GoogleAnnoChartEditorModel" drop-zones="plugins.GoogleAnnoChart.GoogleAnnoChartDropZones" widget-type="7"/>
+  </visualization-list>
+</visualizations>

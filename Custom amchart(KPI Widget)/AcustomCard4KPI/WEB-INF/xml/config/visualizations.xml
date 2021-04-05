@@ -1,0 +1,9 @@
+<!--Replace:-->
+  <!--NAMETORENDER - descriptive name of visualization, name will be render on list-->
+  <!--MstrVisTemplateStyle - style name as defined in styleCatalog.xml-->
+<visualizations>
+  <visualization-list name="ajax">
+    <!--Defining new visualization, with style defined in stylecatalog.xml and with is-mojo="true"-->
+    <visualization id="AcustomCard4KPI" desc="AcustomCard4KPI" is-mojo="true" scope="18" style-name="AcustomCard4KPIStyle"/>
+  </visualization-list>
+</visualizations>
