@@ -228,17 +228,21 @@
 
 
 
-                //NOTE Create Series --------------------------------//
+                //NOTE createSeries() --------------------------------//
                 function createSeries(field, name, hiddenInLegend) {
                     var series, bullet;
 
                     if (AttrIsDate == 'false') {
+                        window.alert('AttrIsDate: ' + AttrIsDate);
                         // None-Date-Block (to be executed if attribute is no date and therefore series must be created for values of attribute(Country: Italy,Germany,Spain))
                         categoryAxis.dataFields.category = "date";
                         categoryAxis.renderer.grid.template.location = 0;
                         categoryAxis.renderer.minGridDistance = 35;
                         
-
+                        var label = categoryAxis.renderer.labels.template;
+                        label.wrap = true;
+                        label.maxWidth = 120;
+/*
                         // Auto-rotating labels
                         categoryAxis.events.on("sizechanged", function (ev) {
                             var axis = ev.target;
@@ -261,7 +265,7 @@
                             }
                             return dy;
                         });
-
+*/
                         series = chart2.series.push(new am4charts.ColumnSeries());
                         series.name = name;
                         series.dataFields.valueY = field;
@@ -276,11 +280,13 @@
                         bullet.label.fill = am4core.color('#ffffff');
                     } else {
                         // Date-Block
+                        window.alert('AttrIsDate: ' + AttrIsDate);
                         series = chart2.series.push(new am4charts.LineSeries());
                         series.name = name;
                         series.dataFields.valueY = field;
                         series.dataFields.dateX = "date";
                         series.groupFields.valueY = "sum";
+                        series.minBulletDistance = 15;
                         series.tooltipText = "{dateX.formatDate('dd.MM.yyyy')}: {name}: [b]{valueY}[/]";
 
                         bullet = series.bullets.push(new am4charts.CircleBullet());
@@ -351,16 +357,53 @@
                     allSeries[0].show(); // hardcoded reference for series1
                     chart2.scrollbarX = new am4charts.XYChartScrollbar();
                     chart2.scrollbarX.minHeight = 40;
-                    chart2.scrollbarX.background.fill = am4core.color("#000000");
+                    // Customize scrollbar background
+                    chart2.scrollbarX.background.fill = am4core.color("#c4c4c4");
                     chart2.scrollbarX.background.fillOpacity = 0.2;
+                    // Customize scrollbar thumb
+                    chart2.scrollbarX.thumb.background.fill = am4core.color("#b0b0b0");
+                    chart2.scrollbarX.thumb.background.fillOpacity = 0.3;
+
                     chart2.scrollbarX.series.push(allSeries[0]);
                     chart2.scrollbarX.parent = chart2.bottomAxesContainer;
+                    chart2.scrollbarX.scrollbarChart.series.getIndex(0).fillOpacity = 0.5;
+                    chart2.scrollbarX.scrollbarChart.series.getIndex(0).bullets.getIndex(0).circle.strokeWidth = 0;
+                    chart2.scrollbarX.scrollbarChart.series.getIndex(0).bullets.getIndex(0).circle.radius = 0;
+
                     chart2.scrollbarX.scrollbarChart.plotContainer.filters.clear(); // remove desaturation
                     //chart2.scrollbarX.scrollbarChart.plotContainer.filters.DesaturateFilter.saturation = 0.5;
+                    customizeGrip(chart2.scrollbarX.startGrip);
+                    customizeGrip(chart2.scrollbarX.endGrip);
                 }
 
 
+                //NOTE customizeGrip() --------------------------------//
+                // Style scrollbar
+                function customizeGrip(grip) {
+                    // Remove default grip image
+                    grip.icon.disabled = true;
 
+                    // Disable background
+                    grip.background.disabled = true;
+
+                    // Add rotated rectangle as bi-di arrow
+                    var img = grip.createChild(am4core.Rectangle);
+                    img.width = 10;
+                    img.height = 10;
+                    img.fill = am4core.color("#999");
+                    img.rotation = 45;
+                    img.align = "center";
+                    img.valign = "middle";
+
+                    // Add vertical bar
+                    var line = grip.createChild(am4core.Rectangle);
+                    line.height = 40;
+                    line.width = 2;
+                    line.fill = am4core.color("#999");
+                    line.align = "center";
+                    line.valign = "middle";
+
+                }
 
 
 
@@ -484,7 +527,7 @@
 
 
 
-                // NOTE Prepare Data
+                // NOTE prepareData()
                 // https://lw.microstrategy.com/msdz/MSDL/GARelease_Current/_GARelease_Archives/103/docs/projects/VisSDK_All/Default.htm#topics/HTML5/Data_Interface_API.htm
                 function prepareData() {
                     // Create a new array (datapool) and push the objects datarecords to the new array. each datarecord is one single object in the array.
@@ -685,7 +728,7 @@
                  // var Say2 = 'me.getProperty("lineColor0"): <br>' + JSON.stringify(me.getProperty("lineColor0"))
                  // var myWindow2 = PopUp(Say1, Say2);
 
-                 // NOTE POPUP for Debugging ------------------//
+                 // NOTE POPUP() for Debugging ------------------//
                  function PopUp(Say1, Say2, displaydata) {
                      var myWindow = window.open("", "", "width=600,height=500");
                      
@@ -702,6 +745,7 @@
 
                      tableFromJson(displaydata);
 
+                     //NOTE tableFromJson() --------------------------------//
                      function tableFromJson(Json2Table) {
                          // Extract value from table header. 
                          var col = [];
