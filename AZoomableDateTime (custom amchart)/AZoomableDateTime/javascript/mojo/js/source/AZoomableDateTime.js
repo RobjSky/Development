@@ -39,14 +39,13 @@
             // Define whether the DOM should be reused on data/layout change or reconstructed from scratch
             reuseDOMNode: false,
 
-
-
             plot: function () {
                 var me = this;
                 var domNode = this.domNode,
                      dp = this.dataInterface;
                 var AttrIsDate = "false";
                 var AttrCount = 0;
+                var seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy')}: {name}: [bold]{valueY}[/]"
                 // ! Visualisation as Selector
                 this.addUseAsFilterMenuItem();
 
@@ -57,9 +56,18 @@
                     enableRangeSelector: 'false',
                     enableDataGrouping: 'true',
                     displayWeekendFill: 'false',
-                    amountStrokeXColor: {fillColor: "#A3A3A3", fillAlpha: "100"},
-                    amountStrokeYColor: {fillColor: "#A3A3A3", fillAlpha: "100"},
+                    hideYAxisLabels: 'false',
+                    amountStrokeXColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
+                    amountStrokeYColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
                     weekendFillColor: {fillColor: "#000000", fillAlpha: "20"},
+                    aggregateValues: 'sum',
+                    metricFormat: "#,###.00",
+                    //XAxisColor: "white",
+                    //YAxisColor: "white",
+                    /*
+                    dateAxis.renderer.labels.template.fill = XAxisColor;
+                    valueAxis.renderer.labels.template.fill = YAxisColor;
+                    */
                     minGridDist: 30,
                 });
 
@@ -91,6 +99,9 @@
                     am4core.color("#65a688")
                 ];
 
+                // Chart Metric Formatter
+                chart2.numberFormatter.numberFormat = me.getProperty("metricFormat");
+
                 // Change Color if different Color-Property is set by user, Colors are set by Index not by Name
                 datapool.cols.forEach((col, i) => {
                     if (me.getProperty("lineColor" + i)) {
@@ -115,6 +126,7 @@
                     //window.alert('category-based AttrIsDate = ' + AttrIsDate)
                     var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
                     var label = categoryAxis.renderer.labels.template;
+                    //categoryAxis.renderer.labels.template.fill = XAxisColor;
                     label.truncate = true;
                     label.maxWidth = 150;
                 // date-based X-Axis:
@@ -125,6 +137,7 @@
                     dateAxis.renderer.minGridDistance = me.getProperty("minGridDist");
 
                     // Format dateAxis
+                    //dateAxis.renderer.labels.template.fill = XAxisColor;
                     dateAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeXColor").fillColor);
                     dateAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeXColor").fillAlpha * 0.01;
                     // Set date label formatting (https://www.amcharts.com/docs/v4/concepts/axes/date-axis/#Setting_date_formats)
@@ -222,22 +235,27 @@
                 // Default or "global" value axis
                 var valueAxis = chart2.yAxes.push(new am4charts.ValueAxis());
                 // Format valueAxis
+                //valueAxis.renderer.labels.template.fill = YAxisColor;
                 valueAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
                 valueAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
 
-
-
+                // TODO
+                if (me.getProperty("hideYAxisLabels") === 'true') {
+                    valueAxis.renderer.labels.template.disabled = true;
+                    valueAxis.cursorTooltipEnabled = false;
+                } else {
+                    valueAxis.renderer.labels.template.disabled = false;
+                    valueAxis.cursorTooltipEnabled = true;
+                }
 
                 //NOTE createSeries() --------------------------------//
                 function createSeries(field, name, hiddenInLegend) {
                     var series, bullet;
 
                     if (AttrIsDate == 'false') {
-                        window.alert('AttrIsDate: ' + AttrIsDate);
                         // None-Date-Block (to be executed if attribute is no date and therefore series must be created for values of attribute(Country: Italy,Germany,Spain))
                         categoryAxis.dataFields.category = "date";
                         categoryAxis.renderer.grid.template.location = 0;
-                        categoryAxis.renderer.minGridDistance = 35;
                         
                         var label = categoryAxis.renderer.labels.template;
                         label.wrap = true;
@@ -270,28 +288,33 @@
                         series.name = name;
                         series.dataFields.valueY = field;
                         series.dataFields.categoryX = "date";
-                        series.tooltipText = "{name}\n{dateX}: {valueY}";
+                        series.tooltipText = "{name}:\n {valueY}";
                         series.stacked = true;
 
                         bullet = series.bullets.push(new am4charts.LabelBullet());
                         bullet.dy = 15;
-                        bullet.label.hideOversized = true;
                         bullet.label.text = '{valueY}';
                         bullet.label.fill = am4core.color('#ffffff');
+                        // truncate and hideOversized: hide column labels when bigger than column, truncate false to prevent text cropping
+                        bullet.label.truncate = false;
+                        bullet.label.hideOversized = true;
                     } else {
                         // Date-Block
-                        window.alert('AttrIsDate: ' + AttrIsDate);
+                        //window.alert('createSeries Date-Block AttrIsDate: ' + AttrIsDate);
                         series = chart2.series.push(new am4charts.LineSeries());
                         series.name = name;
                         series.dataFields.valueY = field;
                         series.dataFields.dateX = "date";
-                        series.groupFields.valueY = "sum";
+                        series.groupFields.valueY = me.getProperty("aggregateValues");
                         series.minBulletDistance = 15;
-                        series.tooltipText = "{dateX.formatDate('dd.MM.yyyy')}: {name}: [b]{valueY}[/]";
+                        //TODO createSeries() --------------------------------//
+                        //series.tooltipText = "{dateX.formatDate('dd.MM.yyyy')}: {name}: [b]{valueY}[/]";
+                        series.tooltipText = seriesToolTipFormat;
 
                         bullet = series.bullets.push(new am4charts.CircleBullet());
                         bullet.circle.stroke = am4core.color("#fff");
-                        bullet.circle.strokeWidth = 2;
+                        bullet.circle.strokeWidth = 1;
+                        bullet.circle.radius = 3;
                     }
 
                     series.strokeWidth = 2;
@@ -302,6 +325,7 @@
                         series.hiddenInLegend = true;
                     }
 
+
                     // extract the index from field = "value+i"
                     var j = Number(field.substring(field.length - 1, field.length))
                     // check whether oppositeA has a true at that index, if so create opposite Axis
@@ -311,6 +335,7 @@
                         valueAxis2.syncWithAxis = valueAxis;
                         // Name Value Axis and set it to opposite
                         valueAxis2.title.text = series.name;
+                        //valueAxis2.renderer.labels.template.fill = YAxisColor;
                         valueAxis2.renderer.opposite = true;
                         // assign axis to current series
                         series.yAxis = valueAxis2;
@@ -319,8 +344,6 @@
                 }
 
                 let allSeries = [];
-
-                //window.alert("Number of attri and metrics: " + datapool.attrs.length + " and " + datapool.cols.length);
 
                 //NOTE Call Series --------------------------------//
                 // no Break-By
@@ -342,7 +365,6 @@
                 };
 
 
-
                 // And, for a good measure, let's add a legend and a cursor
                 if (me.getProperty("showLegend") === 'true') {
                     chart2.legend = new am4charts.Legend();
@@ -357,25 +379,21 @@
                     allSeries[0].show(); // hardcoded reference for series1
                     chart2.scrollbarX = new am4charts.XYChartScrollbar();
                     chart2.scrollbarX.minHeight = 40;
-                    // Customize scrollbar background
+                    // Customize scrollbar background, when hovered
                     chart2.scrollbarX.background.fill = am4core.color("#c4c4c4");
                     chart2.scrollbarX.background.fillOpacity = 0.2;
-                    // Customize scrollbar thumb
+                    // Customize scrollbar background, when unhovered
                     chart2.scrollbarX.thumb.background.fill = am4core.color("#b0b0b0");
                     chart2.scrollbarX.thumb.background.fillOpacity = 0.3;
-
                     chart2.scrollbarX.series.push(allSeries[0]);
                     chart2.scrollbarX.parent = chart2.bottomAxesContainer;
                     chart2.scrollbarX.scrollbarChart.series.getIndex(0).fillOpacity = 0.5;
-                    chart2.scrollbarX.scrollbarChart.series.getIndex(0).bullets.getIndex(0).circle.strokeWidth = 0;
-                    chart2.scrollbarX.scrollbarChart.series.getIndex(0).bullets.getIndex(0).circle.radius = 0;
-
+                    chart2.scrollbarX.scrollbarChart.series.getIndex(0).bullets.getIndex(0).disabled = true;
                     chart2.scrollbarX.scrollbarChart.plotContainer.filters.clear(); // remove desaturation
                     //chart2.scrollbarX.scrollbarChart.plotContainer.filters.DesaturateFilter.saturation = 0.5;
                     customizeGrip(chart2.scrollbarX.startGrip);
                     customizeGrip(chart2.scrollbarX.endGrip);
                 }
-
 
                 //NOTE customizeGrip() --------------------------------//
                 // Style scrollbar
@@ -402,7 +420,6 @@
                     line.fill = am4core.color("#999");
                     line.align = "center";
                     line.valign = "middle";
-
                 }
 
 
@@ -583,6 +600,7 @@
 
                     //set rows data
                     var rows = [];
+                    //window.alert('new be4 c.date: ' + JSON.stringify(dp.getRowHeaders(0).getHeader(0).getName()));
                     //go thru all rows
                     for (i = 0; i < dp.getTotalRows(); i++) {
                         var c = {}
@@ -591,20 +609,41 @@
 
                         switch (AttrIsDate) {
                             case "date":
-                                var parts = c.date.split('.');
-                                // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
-                                c.date = new Date('20' + parts[2], parts[1] - 1, parts[0]);
+                                if (c.date.indexOf('.') > -1) {
+                                    var parts = c.date.split('.');
+                                    if (parts[2].length == 2) {
+                                        parts[2] = '20' + parts[2];
+                                    }
+                                    // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                    c.date = new Date(parts[2], parts[1] - 1, parts[0]);
+                                } else if (c.date.indexOf('/') > -1) {
+                                    var parts = c.date.split('/');
+                                    if (parts[2].length == 2) {
+                                        parts[2] = '20' + parts[2];
+                                    }
+                                    // Note: JavaScript counts months from 0 to 11. January is 0. December is 11.
+                                    // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                    c.date = new Date(parts[2], parts[0] - 1, parts[1]);
+                                }
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
                                 break;
+                            
                             case "datetime":
                                 var parts = c.date.split(' ');
-                                var dparts = parts[0].split('.');
+                                //var dparts = parts[0].split('.');
+                                var dparts = parts[0].split(/\.|\//); //split by dot(.) or forwardslash(/)
                                 var tparts = parts[1].split(':');
                                 c.date = new Date('20' + dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
+                                if (i < 2) {
+                                    window.alert('DAteTIme with found.')
+                                    window.alert('dparts2(Y): ' + dparts[2] + ' //*// dparts0(M): ' + dparts[0] + ' //*// dparts1-1(D): ' + (dparts[1] - 1) + ' //*// dparts1: ' + dparts[1])
+                                }
                                 break;
                             default:
                                 //window.alert('default: Doesn´t look like a date to me. Maybe try again. Good Luck.');
                                 break;
-                        }
+                        };
 
                         c.attributes = [];
                         // Attribute.Values: get the attribute values. Z=AttrCount so the first iteration is skipped IF the first attribute is a date and therefore it should be in c.date
@@ -613,7 +652,6 @@
                             //c['attri' + dp.getRowTitles(0).getTitle(z).getName()] = dp.getRowHeaders(i).getHeader(z).getName()
                         }
 
-
                         c.values = [];
                         // Metric.Values: get the metric values.
                         for (var z = 0; z < dp.getColumnHeaderCount(); z++) {
@@ -621,7 +659,8 @@
                         }
                         // push c to current position in rows-Array. Meaning c.date and c.values, resulting in {"date" : "yyyy-mm-ddThh:mm:ss.000Z" , "values" : 123 , "values0" : 456}
                         rows[i] = c;
-                    }
+                    };
+                    //window.alert('new after c.date: ' + JSON.stringify(rows[0]));
                     datapool.rows = rows;
 
  //window.alert("Number of attri and metrics: " + datapool.attrs.length + " and " + datapool.cols.length);
@@ -645,15 +684,7 @@
                                     date: row.date
                                 };
                                 data.push(dates[row.date]);
-                                
-                                
-
                             }
-                            //window.alert('1' + JSON.stringify(row.date));
-                            //window.alert('2' + JSON.stringify(data));
-                            //window.alert('3 i: ' + i + ' - ' + JSON.stringify(row[datapool.attrs[1]]));
-
-
 
                             var breakByName = datapool.attrs[1];
                             var value = 'values0'; //datapool.cols[0];
@@ -665,53 +696,10 @@
                             };
                         }
                         datapool.transposedRows = data;
-                        
-                        
                         //var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs) +'\n datapool.transMetricNames: ' + JSON.stringify(datapool.transMetricNames);
                         //var Say2 = "datapool.transposedRows:";
                         //var myWindow2 = PopUp(Say1, Say2, datapool.transposedRows);
                     }
-
-                
-
-
-
-
-                    
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
                     //------------------ POPUP for Debugging INPUT ------------------//
