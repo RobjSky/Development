@@ -27,15 +27,16 @@
                 // Fill the property data here
 
                 return [
+                    // Tab amCharts Timeline Options
                     {
-                        name: 'amCharts Timeline',
+                        name: 'amCharts Timeline Options',
                         value: [
                             {
                                 style: $WT.EDITORGROUP,
                                 items: [
                                     {
                                         style: $WT.LABEL,
-                                        labelText: "amCharts Timeline"
+                                        labelText: "amCharts Timeline Options"
                                     },
                                     // Legend
                                     {
@@ -116,90 +117,73 @@
                                         disabled: this.getHost().getProperty('displayXYCursor') === "false",
                                         propertyName: "enableWheelScroll",
                                         labelText: "Wheel Scroll"
+                                    },
+                                    {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                            style: $WT.LABEL,
+                                            width: "40%",
+                                            labelText: "Aggregation"
+                                            }, {
+                                                style: $WT.PULLDOWN,
+                                                width: "60%",
+                                                disabled: this.getHost().getProperty('showLegend') === "false",
+                                                propertyName: "aggregateValues",
+                                                items: [{
+                                                        name: "average",
+                                                        value: "average"
+                                                    }, {
+                                                        name: "sum",
+                                                        value: "sum"
+                                                    }, {
+                                                        name: "open",
+                                                        value: "open"
+                                                    }, {
+                                                        name: "close",
+                                                        value: "close"
+                                                    }, {
+                                                        name: "min",
+                                                        value: "min"
+                                                    }, {
+                                                        name: "max",
+                                                        value: "max"
+                                                    }]
+                                            }]
+                                    },
+                                    {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                            style: $WT.LABEL,
+                                            width: "40%",
+                                            labelText: "Metric Form"
+                                        }, {
+                                            style: $WT.PULLDOWN,
+                                            width: "60%",
+                                            propertyName: "metricFormat",
+                                            items: [{
+                                                name: "default",
+                                                value: "#,###.00"
+                                            }, {
+                                                name: "Euro",
+                                                value: "'€' #,###.00"
+                                            }, {
+                                                name: "Dollar",
+                                                value: "'$' #,###.00"
+                                            }, {
+                                                name: "Percentage",
+                                                value: "#,###.00%"
+                                            }, {
+                                                name: "integer",
+                                                value: "#."
+                                            }, {
+                                                name: "thousand delimiter",
+                                                value: "#,###.##"
+                                            }]
+                                        }]
                                     }
                                 ]
                             },
-                            // Customizing Fills
-                            {
-                                style: $WT.EDITORGROUP,
-                                items: [{
-                                        style: $WT.LABEL,
-                                        labelText: "Customizing fills"
-                                    },
-                                    {
-                                        style: $WT.TWOCOLUMN,
-                                        disabled: this.getHost().getProperty('displayGridlines') === "false",
-                                        items: [{
-                                                style: $WT.CHECKBOXANDLABEL,
-                                                propertyName: "displayFill",
-                                                labelText: "Show Fill",
-                                                width: "50%"
-                                            },
-                                            {
-                                                style: $WT.STEPPER,
-                                                disabled: this.getHost().getProperty('displayFill') === "false",
-                                                propertyName: "amountFillOpacity",
-                                                min: 0,
-                                                max: 10,
-                                                width: "50%"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            //Grid Lines
-                            {
-                                style: $WT.EDITORGROUP,
-                                items: [{
-                                        style: $WT.LABEL,
-                                        labelText: "Grid Lines"
-                                    },
-                                    // {
-                                    //     style: $WT.TWOCOLUMN,
-                                    //     items: [{
-                                    //             style: $WT.LABEL,
-                                    //             width: "60%",
-                                    //             labelText: "Opacity/Alpha * 0,1"
-                                    //         },  
-                                    //         {
-                                    //            style: $WT.STEPPER,
-                                    //                propertyName: "amountStrokeOpacity",
-                                    //                width: "40%",
-                                    //                min: 0,
-                                    //                max: 100
-                                    //         }
-                                    //     ]
-                                    // },
-                                    {
-                                        style: $WT.TWOCOLUMN,
-                                        items: [{
-                                                style: $WT.LABEL,
-                                                width: "30%",
-                                                labelText: "Stroke-X"
-                                            },
-                                            {
-                                                style: $WT.FILLGROUP,
-                                                width: "70%",
-                                                propertyName: "amountStrokeXColor",
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        style: $WT.TWOCOLUMN,
-                                        items: [{
-                                                style: $WT.LABEL,
-                                                width: "30%",
-                                                labelText: "Stroke-Y"
-                                            },
-                                            {
-                                                style: $WT.FILLGROUP,
-                                                width: "70%",
-                                                propertyName: "amountStrokeYColor",
-                                            }
-                                        ]
-                                    },
-                                ]
-                            },
+                            
                             //Weekendhighlights
                             {
                                 style: $WT.EDITORGROUP,
@@ -224,35 +208,6 @@
                                     },
                                 ]
                             },
-                            //Legend Colors (Colors of Metrics and opposite Axis)
-                            {
-                                style: $WT.EDITORGROUP,
-                                items: (function () {
-                                    var x = [
-                                        {
-                                            style: $WT.LABEL,
-                                            labelText: "Legend Colors"
-                                        }];
-                                    for (var i = 0; i < numOfMetrics; i++) {
-                                        var color;
-                                        x.push(
-                                            {
-                                                style: $WT.LABEL,
-                                                labelText: myViz.zonesModel.getDropZones().zones[2].items[i].n
-                                            },
-                                            {
-                                                style: $WT.FILLGROUP,
-                                                propertyName: "lineColor" + i
-                                            }, {
-                                                style: $WT.CHECKBOXANDLABEL,
-                                                propertyName: "oppositeAxis" + i,
-                                                labelText: "opposite Axis"
-                                            },
-                                        );
-                                    }
-                                    return x;
-                                })()
-                            },
                             // minGridDistance
                             {
                                 style: $WT.EDITORGROUP,
@@ -268,6 +223,123 @@
                                         width: "100%"
                                     }]
                             }
+                        ]
+                    },
+                    // Tab amCharts Timeline Format
+                    {
+                        name: 'amCharts Timeline Format',
+                        value: [{
+                                style: $WT.EDITORGROUP,
+                                items: [{
+                                        style: $WT.LABEL,
+                                        labelText: "amCharts Timeline Format"
+                                        },
+                                // Customizing Fills
+                                        {
+                                        style: $WT.LABEL,
+                                        labelText: "Customizing fills"
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            disabled: this.getHost().getProperty('displayGridlines') === "false",
+                                            items: [{
+                                                    style: $WT.CHECKBOXANDLABEL,
+                                                    propertyName: "displayFill",
+                                                    labelText: "Show Fill",
+                                                    width: "50%"
+                                                },
+                                                {
+                                                    style: $WT.STEPPER,
+                                                    disabled: this.getHost().getProperty('displayFill') === "false",
+                                                    propertyName: "amountFillOpacity",
+                                                    min: 0,
+                                                    max: 10,
+                                                    width: "50%"
+                                                }
+                                            ]
+                                        }]
+                                    },
+                                //Grid Lines
+                                {
+                                    style: $WT.EDITORGROUP,
+                                    items: [{
+                                            style: $WT.LABEL,
+                                            labelText: "Grid Lines"
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "Stroke-X"
+                                                },
+                                                {
+                                                    style: $WT.FILLGROUP,
+                                                    width: "70%",
+                                                    propertyName: "amountStrokeXColor",
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "Stroke-Y"
+                                                },
+                                                {
+                                                    style: $WT.FILLGROUP,
+                                                    width: "70%",
+                                                    propertyName: "amountStrokeYColor",
+                                                }
+                                            ]
+                                        }]
+                                },
+                                // Options Group
+                                {
+                                    style: $WT.EDITORGROUP,
+                                    items: [{
+                                            style: $WT.LABEL,
+                                            labelText: "Options"
+                                        },
+                                        {
+                                            style: $WT.CHECKBOXANDLABEL,
+                                            propertyName: "hideYAxisLabels",
+                                            labelText: "Hide Y-Axis-Labels"
+                                        },
+                                        {
+                                            style: $WT.CHECKBOXANDLABEL,
+                                            disabled: this.getHost().getProperty('displayXYCursor') === "false",
+                                            propertyName: "placeholder",
+                                            labelText: "Place Holder"
+                                        }
+                                    ]
+                                },
+                                //Metric Colors and Axis (Colors of Metrics and switch for opposite Axis)
+                                {
+                                    style: $WT.EDITORGROUP,
+                                    items: (function () {
+                                        var x = [{
+                                            style: $WT.LABEL,
+                                            labelText: "Metric Colors and Axis"
+                                        }];
+                                        for (var i = 0; i < numOfMetrics; i++) {
+                                            var color;
+                                            x.push({
+                                                style: $WT.LABEL,
+                                                labelText: myViz.zonesModel.getDropZones().zones[2].items[i].n
+                                            }, {
+                                                style: $WT.FILLGROUP,
+                                                propertyName: "lineColor" + i
+                                            }, {
+                                                style: $WT.CHECKBOXANDLABEL,
+                                                propertyName: "oppositeAxis" + i,
+                                                labelText: "opposite Axis"
+                                            }, );
+                                        }
+                                        return x;
+                                    })()
+                                },
                         ]
                     }
                 ];
