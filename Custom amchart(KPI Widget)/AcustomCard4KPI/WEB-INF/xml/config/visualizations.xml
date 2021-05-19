@@ -2,8 +2,9 @@
   <!--NAMETORENDER - descriptive name of visualization, name will be render on list-->
   <!--MstrVisTemplateStyle - style name as defined in styleCatalog.xml-->
 <visualizations>
-  <visualization-list name="ajax">
+  <visualization-list name="ajax" show-in-web="true" view-mode="51">
     <!--Defining new visualization, with style defined in stylecatalog.xml and with is-mojo="true"-->
-    <visualization id="AcustomCard4KPI" desc="AcustomCard4KPI" is-mojo="true" scope="18" style-name="AcustomCard4KPIStyle"/>
+    <!--<visualization attribute-minimum="1" desc="AcustomCard4KPI" is-mojo="true" metric-minimum="1" scope="19" style-name="AcustomCard4KPI" editor-model="plugins.AcustomCard4KPI.AcustomCard4KPIEditorModel" drop-zones="plugins.AcustomCard4KPI.AcustomCard4KPIDropZones" widget-type="7"/>-->
+    <visualization attribute-minimum="1" desc="AcustomCard4KPI" is-mojo="true" metric-minimum="1" scope="19" style-name="AcustomCard4KPIStyle" editor-model="plugins.AcustomCard4KPI.AcustomCard4KPIEditorModel"/>
   </visualization-list>
 </visualizations>

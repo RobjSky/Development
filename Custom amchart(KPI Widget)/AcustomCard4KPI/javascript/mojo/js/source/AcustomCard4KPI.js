@@ -2,8 +2,10 @@
  * Replace
  * MojoVisualizationTemplate with your plugin folder name which should be the same as the JS file name
  * ...YOUR JS CODE... - Javascript code
+ * 
+ * 
+ * 
  */
-
 
 (function () {
     // Define this code as a plugin in the mstrmojo object
@@ -12,25 +14,30 @@
     }
     // Custom mojo visualizations require the CustomVisBase library to render
     mstrmojo.requiresCls("mstrmojo.CustomVisBase");
+
+
+
+
+
+
+
     // Declare the visualization object
     mstrmojo.plugins.AcustomCard4KPI.AcustomCard4KPI = mstrmojo.declare(
         // Declare that this code extends CustomVisBase
         mstrmojo.CustomVisBase,
-        null,
-        {
+        null, {
             // Define the Javascript class that renders your visualization as mstrmojo.plugins.{plugin name}.{js file name}
             scriptClass: 'mstrmojo.plugins.AcustomCard4KPI.AcustomCard4KPI',
+            // Define the CSS class that will be appended to container div
+            cssClass: "AcustomCard4KPI",
+            // Define the error message to be displayed if JavaScript errors prevent data from being displayed
+            errorDetails: "This visualization requires more...",
             // Define the external libraries to be used - in this sample. the amcharts library
-            externalLibraries: [{url: "//cdn.amcharts.com/lib/4/core.js"},
-			{url: "//cdn.amcharts.com/lib/4/charts.js"},
-            {url: "//cdn.amcharts.com/lib/4/themes/animated.js"},
-            {url: "//cdn.amcharts.com/lib/4/themes/microchart.js"}],
+            externalLibraries: [{url: "//cdn.amcharts.com/lib/4/core.js"},			{url: "//cdn.amcharts.com/lib/4/charts.js"},            {url: "//cdn.amcharts.com/lib/4/themes/animated.js"},            {url: "//cdn.amcharts.com/lib/4/themes/microchart.js"}],
             // Define whether a tooltip should be displayed with additional information
             useRichTooltip: true,
-            model: null,
-
-
-
+            // Define whether the DOM should be reused on data/layout change or reconstructed from scratch
+            reuseDOMNode: false,
 
             plot: function () {
                 var me = this;
@@ -38,13 +45,23 @@
                     dp = this.dataInterface;
                 // Create chart instance
                 //var chart = am4core.create(this.domNode, am4charts.XYChart);
+                // clear div 
+                //document.getElementById('contai').innerHTML = "";
 
                 // Create a container
                 //var container = am4core.create(this.domNode, am4core.Container);
                 //container.width = am4core.percent(100);
                 //container.height = am4core.percent(100);
                 //container.layout = "horizontal";
-// codepen
+/*
+                this.setDefaultPropertyValues({
+                    showPic = 'true',
+                });
+*/
+
+//var showPiccy = me.getProperty("showPic");
+//window.alert(showPiccy + ' must be showPic');
+// NOTE codepen start
 
 /**---------------------------------------
 // contai (div#contai)
@@ -56,17 +73,23 @@
 //  +KPIcontai (.flex-topbar)
 //  | +mainKPIcontai (.topbar-item1)
 //  | +subsContai (.flex-subscontainer)
-//  |   +card(s) (.card, .container, .flex-subsitem1)
+//  |   +card(s) (.card, .flex-subsitem1)
  * --------------------------------------- */
 /*🡫🢃🡣⮧⮯⬇⇩↓⭣↴⬇↓⇓▼⮇⭝🡠🡡🡢🡣🡤🡥🡦🡧🡨🡩🡪🡫🡬🡭🡮🡯🡰🡱🡲🡳🡴🡵🡶🡷🡸🡹🡺🡻🡼🡽🡾🡿🢀🢁🢂🢃🢄🢅🢆🢇◄▲▼►*/
-
-var showPic = true,
+/* VERSION 1.7 2021/05/11 */
+var 
+    //showPic = true,
+    showPic = me.getProperty("showPic"),
     showMainKPI = true,
-    showProgressbar = true,
+    showProgressbar = false,
+    showVariationOnly = true,
+    cardstyle = "filled",
+    /* filled bordered */
     mainColorF,
-    mainColorB = "white",
+    mainColorB = "#efefed",
     subKPIColors = ["#000", "#5b5b5b", "#7f7f7f", "#9e9e9e"],
-    subKPIFontColors = ["#9e9e9e", "#7f7f7f", "#5b5b5b", "#000"],
+    /*subKPIFontColors = ["purple", "green", "yellow", "orange"],*/
+    subKPIFontColors = ["#c4c4c4", "#c4c4c4", "#444", "#444"],
     subKPITextColor = "#9e9e9e",
     barMin = -30,
     barMax = 30,
@@ -75,6 +98,7 @@ var showPic = true,
     barColorF = "red",
     barColorB = "#d3d3d3";
 
+
 am4core.useTheme(am4themes_animated);
 am4core.useTheme(am4themes_microchart);
 
@@ -82,19 +106,19 @@ am4core.useTheme(am4themes_microchart);
 // Add data
 data = [{
     "category": "Besucher -FK",
-    "value": 100.5
+    "value": 1101.5
 }, {
     "category": "Budget",
-    "value": 152
+    "value": 1520
 }, {
-    "category": "previous Year",
-    "value": 120.5
+    "category": "prev. Year",
+    "value": 1200.5
 }, {
-    "category": "previous Month",
-    "value": 90.55
+    "category": "prev. Month",
+    "value": 900.55
 }, {
-    "category": "previous Week",
-    "value": 66.55
+    "category": "prev. Week",
+    "value": 660.55
 }];
 
 
@@ -187,7 +211,7 @@ function createProgressBar(putHere, category, value, target) {
             pattern.strokeWidth = 3;
             //pattern.gap = 2;
             pattern.rotation = 45;
-            pattern.stroke = am4core.color(barColorNegative).lighten(0.5);
+            pattern.stroke = am4core.color(barColorNegative).lighten(0.2);
             return pattern;
         } else if (barMin < target.dataItem.valueX && target.dataItem.valueX < 0) {
             return barColorNegative;
@@ -198,7 +222,7 @@ function createProgressBar(putHere, category, value, target) {
             pattern.strokeWidth = 3;
             //pattern.gap = 2;
             pattern.rotation = 45;
-            pattern.stroke = am4core.color(barColorPositive).lighten(0.5);
+            pattern.stroke = am4core.color(barColorPositive).lighten(0.2);
             return pattern;
         }
     });
@@ -220,19 +244,21 @@ var contai = document.createElement('div');
 contai.setAttribute("id", "contai");
 
 
-// Create Image Container // Create Sub-Containers
-if (showPic === true) {
-    var imgContainer = document.createElement('div');
-    imgContainer.classList.add('imgContainer');
-    var imgOverlay = document.createElement('div');
-    imgOverlay.classList.add('overlay');
-    var imgText = document.createElement('div');
-    imgText.classList.add('imgText');
-    imgText.innerHTML = "Titel2: <br>" + data[0].category
-    var img = document.createElement("img");
-    img.classList.add('coverimage');
-    img.src = "https://i.imgur.com/9Hvv9je.jpg";
+window.alert(showPic + ' must be showPic. vorm IF');
 
+// Create Image Container // Create Sub-Containers
+if (showPic) { //showPic === true
+    window.alert(showPic + ' must be showPic. im IF');
+    var imgContainer = document.createElement('div');
+    var imgOverlay = document.createElement('div');
+    var imgText = document.createElement('div');
+    var img = document.createElement("img");
+    imgContainer.classList.add('imgContainer');
+    imgOverlay.classList.add('overlay');
+    imgText.classList.add('imgText');
+    img.classList.add('coverimage');
+    imgText.innerHTML = "Titel2: <br>" + data[0].category
+    img.src = "https://i.imgur.com/9Hvv9je.jpg";
     imgOverlay.appendChild(imgText);
     imgContainer.appendChild(imgOverlay);
     imgContainer.appendChild(img);
@@ -244,14 +270,16 @@ KPIcontai.id = "flex-topbar";
 contai.appendChild(KPIcontai);
 
 // Create Main-container for kpiContainer
-if (showMainKPI === true) {
+if (showMainKPI) {
     var KPIName = (data[0].category);
     var KPIValue = (data[0].value);
     var mainKPIcontai = document.createElement('div');
     mainKPIcontai.classList.add('topbar-item1');
-    mainKPIcontai.innerHTML = "<span class='KPIName'>Category: " + KPIName + "</span>";
-    mainKPIcontai.innerHTML += "<br><span class='KPIValue'>" + KPIValue + "</span>";
+    mainKPIcontai.innerHTML = "<div class='KPIName';>Category: " + KPIName + "</div>";
+    /*mainKPIcontai.innerHTML += "<hr class='style-two'; style='background-color:white'>";*/
+    mainKPIcontai.innerHTML += "<span class='KPIValue'; style='font-size:10vw;'>" + KPIValue + "</span>";
     mainKPIcontai.style.background = mainColorB;
+
     KPIcontai.appendChild(mainKPIcontai);
 }
 
@@ -261,34 +289,22 @@ subsContai.classList.add('flex-subscontainer');
 for (var i = 1; i < data.length; i++) {
     var subKPIName = (data[i].category);
     var subKPIValue = (data[i].value);
-    var devToMain = Math.round((1 - data[i].value / data[0].value) * 100).toFixed(2);
-    card = createCard(subKPIName, subKPIValue, devToMain, subKPIFontColors[i - 1])
-    //Filled Card:
-    card.style.background = subKPIColors[i - 1];
-    card.style.color = subKPIFontColors[i - 1];
-    //Bordered Card:
-    //card.style.background = "#efefed";
-    //card.style.color = "black";
-    //card.style.border = "1px solid " + subKPIColors[i-1];
-
+    var devToMain = Math.round((1 - data[i].value / data[0].value) * 100).toFixed(1);
+    card = createCard(subKPIName, subKPIValue, devToMain, subKPIFontColors[i - 1], subKPIColors[i - 1]);
     subsContai.appendChild(card);
     KPIcontai.appendChild(subsContai);
 }
 
 /* *---------------------------------------------------
-* Import into MSTR Viz
-*  *-------------------------------------------------- */
+ * Import into MSTR Viz
+ *  *-------------------------------------------------- */
 //chartdiv.appendChild(contai) //codepen
 this.domNode.appendChild(contai); //MSTR
-
-
-
-
 
 /* *--------------------------------------------------------
  * create Card for KPI Widget
  * --------------------------------------------------------*/
-function createCard(subKPIName, subKPIValue, devToMain, color) {
+function createCard(subKPIName, subKPIValue, devToMain, fontcolor, backcolor) {
     var card = document.createElement('div'),
         bulletdiv = document.createElement('div'),
         txt1 = document.createElement('div'),
@@ -296,41 +312,42 @@ function createCard(subKPIName, subKPIValue, devToMain, color) {
         txt3 = document.createElement('span'),
         txt4 = document.createElement('div');
     txt1.classList.add('KPIName');
+    txt1.innerHTML = subKPIName +
+        "<hr class='style-two'; style='background-color:" + fontcolor + ";'>"
     txt2.classList.add('KPIValue');
-    txt4.classList.add('KPITxt');
     bulletdiv.id = "bulletdiv";
-    bulletdiv.style.height = '15px';
     card.style.position = "relative";
     card.setAttribute("id", "rangeselect");
     card.classList.add('card');
     card.classList.add('flex-subsitem1');
-    //txt1.style.background = color;
-    //txt1.style.color = "white";
-    txt1.style.color = color;
-    //txt1.style.borderBottom= "1px solid " + color;
 
-
-    txt1.innerHTML = subKPIName +
-        "<hr style='width:75%; text-align:left; margin:0px; margin-top:5px; height:1px; border:none; background-color:#8A8A8A;'>";
-    txt2.innerHTML = subKPIValue;
-
-    if (devToMain < barMin) {
-        txt3.innerHTML = '🡫 ' + devToMain + "%"
-        txt3.style.color = am4core.color(barColorNegative).lighten(0.5);
-    } else if (barMin < devToMain && devToMain < 0) {
-        txt3.innerHTML = '🡮 ' + devToMain + "%"
-        txt3.style.color = barColorNegative
-    } else if (0 < devToMain && devToMain < barMax) {
-        txt3.innerHTML = '🡭 ' + devToMain + "%"
-        txt3.style.color = barColorPositive;
-    } else if (barMax < devToMain) {
-        txt3.innerHTML = '🡩 ' + devToMain + "%"
-        txt3.style.color = am4core.color(barColorPositive).lighten(0.5);
+    if (showVariationOnly) {
+        txt2.innerHTML = devToMain + "%";
+        bulletdiv.style.height = '11px';
+        //createThreshold(txt2, devToMain)
+        card.style.background = backcolor;
+        card.style.color = fontcolor;
+    } else {
+        createThreshold(txt3, devToMain)
+        bulletdiv.style.height = '14px';
+        txt2.innerHTML = subKPIValue;
+        txt4.classList.add('KPITxt');
+        txt4.appendChild(txt3);
+        txt4.innerHTML += " zu " + subKPIName;
+        if (cardstyle == "filled") {
+            txt4.style.background = fontcolor;
+            card.style.background = backcolor;
+            card.style.color = fontcolor;
+        } else if (cardstyle == "bordered") {
+            txt1.style.padding = "0.1em 0.5em 0.1em 0.5em";
+            txt1.innerHTML = subKPIName
+            txt4.style.background = am4core.color(backcolor).lighten(0.8);
+            card.style.background = mainColorB;
+            card.style.color = backcolor;
+            card.style.border = "1px solid " + backcolor;
+            card.style.borderTop = "9px solid" + backcolor;
+        };
     }
-    txt4.appendChild(txt3);
-    txt4.innerHTML += " zu " + subKPIName;
-
-
 
     card.appendChild(txt1);
     card.appendChild(txt2);
@@ -343,14 +360,26 @@ function createCard(subKPIName, subKPIValue, devToMain, color) {
     return (card);
 }
 
+function createThreshold(showVari, devToMain) {
+    if (devToMain < barMin) {
+        showVari.innerHTML = '🡫 ' + devToMain + "%"
+        showVari.style.color = am4core.color(barColorNegative).lighten(0.2);
+    } else if (barMin < devToMain && devToMain < 0) {
+        showVari.innerHTML = '🡮 ' + devToMain + "%"
+        showVari.style.color = barColorNegative
+    } else if (0 < devToMain && devToMain < barMax) {
+        showVari.innerHTML = '🡭 ' + devToMain + "%"
+        showVari.style.color = barColorPositive;
+    } else if (barMax < devToMain) {
+        showVari.innerHTML = '🡩 ' + devToMain + "%"
+        showVari.style.color = am4core.color(barColorPositive).lighten(0.2);
+    }
+}
 
 
 
 
-
-
-
-
+// NOTE codepen end
 
 
 
