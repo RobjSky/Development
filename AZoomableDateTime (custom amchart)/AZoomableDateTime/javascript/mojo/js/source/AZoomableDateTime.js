@@ -57,17 +57,15 @@
                     enableDataGrouping: 'true',
                     displayWeekendFill: 'false',
                     hideYAxisLabels: 'false',
+                    fontColor: {fillColor: "#000000", fillAlpha: "100"},
                     amountStrokeXColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
                     amountStrokeYColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
+                    scrollbarBackgroundColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
+                    scrollbarThumbColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
+                    scrollbarUnselectedColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
                     weekendFillColor: {fillColor: "#000000", fillAlpha: "20"},
                     aggregateValues: 'sum',
                     metricFormat: "#,###.00",
-                    //XAxisColor: "white",
-                    //YAxisColor: "white",
-                    /*
-                    dateAxis.renderer.labels.template.fill = XAxisColor;
-                    valueAxis.renderer.labels.template.fill = YAxisColor;
-                    */
                     minGridDist: 30,
                 });
 
@@ -75,6 +73,10 @@
 
                 // Create chart instance
                 var chart2 = am4core.create(this.domNode, am4charts.XYChart);
+
+                chart2.hiddenState.properties.opacity = 0; // this creates initial fade-in
+                chart2.dateFormatter.dateFormat = "yyyy-MM-dd hh:mm";
+                chart2.dateFormatter.inputDateFormat = "yyyy-MM-dd HH:mm";
                 if (me.getProperty("enableWheelScroll")) {
                     chart2.mouseWheelBehavior = "panX";
                 };
@@ -129,6 +131,7 @@
                     //categoryAxis.renderer.labels.template.fill = XAxisColor;
                     label.truncate = true;
                     label.maxWidth = 150;
+                    label.fill = am4core.color(me.getProperty("fontColor").fillColor);
                 // date-based X-Axis:
                 } else {
                     //window.alert('date-based AttrIsDate = ' + AttrIsDate)
@@ -137,12 +140,13 @@
                     dateAxis.renderer.minGridDistance = me.getProperty("minGridDist");
 
                     // Format dateAxis
-                    //dateAxis.renderer.labels.template.fill = XAxisColor;
                     dateAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeXColor").fillColor);
                     dateAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeXColor").fillAlpha * 0.01;
+                    dateAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
                     // Set date label formatting (https://www.amcharts.com/docs/v4/concepts/axes/date-axis/#Setting_date_formats)
                     dateAxis.dateFormats.setKey("day", "dd.MM.");
                     dateAxis.dateFormats.setKey("week", "'KW'ww");
+                    dateAxis.periodChangeDateFormats.setKey("hour", "[bold]dd.MMM[/]\nEEE");
                     dateAxis.periodChangeDateFormats.setKey("day", "[bold]dd.MMM[/]");
                     dateAxis.periodChangeDateFormats.setKey("week", "[bold]'KW'ww[/]");
                     dateAxis.periodChangeDateFormats.setKey("month", "[bold]yyyy[/]");
@@ -238,6 +242,7 @@
                 //valueAxis.renderer.labels.template.fill = YAxisColor;
                 valueAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
                 valueAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
+                valueAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
 
                 // TODO
                 if (me.getProperty("hideYAxisLabels") === 'true') {
@@ -337,6 +342,9 @@
                         valueAxis2.title.text = series.name;
                         //valueAxis2.renderer.labels.template.fill = YAxisColor;
                         valueAxis2.renderer.opposite = true;
+                        valueAxis2.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
+                        valueAxis2.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
+                        valueAxis2.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
                         // assign axis to current series
                         series.yAxis = valueAxis2;
                     }
@@ -379,12 +387,37 @@
                     allSeries[0].show(); // hardcoded reference for series1
                     chart2.scrollbarX = new am4charts.XYChartScrollbar();
                     chart2.scrollbarX.minHeight = 40;
+
+
+
+
                     // Customize scrollbar background, when hovered
-                    chart2.scrollbarX.background.fill = am4core.color("#c4c4c4");
-                    chart2.scrollbarX.background.fillOpacity = 0.2;
+                    //chart2.scrollbarX.background.fill = am4core.color("#c4c4c4");
+                    chart2.scrollbarX.background.fill = am4core.color(me.getProperty("scrollbarBackgroundColor").fillColor);
+                    //chart2.scrollbarX.background.fillOpacity = 0.2;
+                    chart2.scrollbarX.background.fillOpacity = me.getProperty("scrollbarBackgroundColor").fillAlpha * 0.01;
+
+                    //chart2.scrollbarX.stroke = am4core.color("red");
+                    //chart2.scrollbarX.background.filters.clear();
                     // Customize scrollbar background, when unhovered
-                    chart2.scrollbarX.thumb.background.fill = am4core.color("#b0b0b0");
-                    chart2.scrollbarX.thumb.background.fillOpacity = 0.3;
+                    //chart2.scrollbarX.thumb.background.fill = am4core.color("#b0b0b0");
+                    //chart2.scrollbarX.thumb.background.fillOpacity = 0.3;
+                    chart2.scrollbarX.thumb.background.fill = am4core.color(me.getProperty("scrollbarThumbColor").fillColor);
+                    chart2.scrollbarX.thumb.background.fillOpacity = me.getProperty("scrollbarThumbColor").fillAlpha * 0.01;
+                    // Unselected area
+                    //chart2.scrollbarX.unselectedOverlay.fill = am4core.color("#c3c3c3");
+                    //chart2.scrollbarX.unselectedOverlay.fillOpacity = 0.7;
+                    chart2.scrollbarX.unselectedOverlay.fill = am4core.color(me.getProperty("scrollbarUnselectedColor").fillColor);
+                    chart2.scrollbarX.unselectedOverlay.fillOpacity = me.getProperty("scrollbarUnselectedColor").fillAlpha * 0.01;
+                    
+
+
+
+
+
+
+
+
                     chart2.scrollbarX.series.push(allSeries[0]);
                     chart2.scrollbarX.parent = chart2.bottomAxesContainer;
                     chart2.scrollbarX.scrollbarChart.series.getIndex(0).fillOpacity = 0.5;
@@ -405,18 +438,18 @@
                     grip.background.disabled = true;
 
                     // Add rotated rectangle as bi-di arrow
-                    var img = grip.createChild(am4core.Rectangle);
+                    var img = grip.createChild(am4core.Circle);
                     img.width = 10;
                     img.height = 10;
                     img.fill = am4core.color("#999");
-                    img.rotation = 45;
+                    //img.rotation = 45;
                     img.align = "center";
                     img.valign = "middle";
 
                     // Add vertical bar
                     var line = grip.createChild(am4core.Rectangle);
                     line.height = 40;
-                    line.width = 2;
+                    line.width = 1;
                     line.fill = am4core.color("#999");
                     line.align = "center";
                     line.valign = "middle";
@@ -545,6 +578,8 @@
 
 
                 // NOTE prepareData()
+                // https://www2.microstrategy.com/producthelp/2020/VisSDK/Content/topics/HTML5/DataInterfaceAPI.htm
+                // https://www2.microstrategy.com/producthelp/Current/VisSDK/Content/topics/HTML5/DataInterfaceAPI.htm#DataInterface
                 // https://lw.microstrategy.com/msdz/MSDL/GARelease_Current/_GARelease_Archives/103/docs/projects/VisSDK_All/Default.htm#topics/HTML5/Data_Interface_API.htm
                 function prepareData() {
                     // Create a new array (datapool) and push the objects datarecords to the new array. each datarecord is one single object in the array.
@@ -629,19 +664,22 @@
                                 break;
                             
                             case "datetime":
+                                if (i < 2) {
+                                    window.alert('c.date before: ' + c.date);
+                                }
                                 var parts = c.date.split(' ');
                                 //var dparts = parts[0].split('.');
                                 var dparts = parts[0].split(/\.|\//); //split by dot(.) or forwardslash(/)
                                 var tparts = parts[1].split(':');
-                                c.date = new Date('20' + dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
+                                c.date = new Date(dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
                                 seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
                                 if (i < 2) {
-                                    window.alert('DAteTIme with found.')
-                                    window.alert('dparts2(Y): ' + dparts[2] + ' //*// dparts0(M): ' + dparts[0] + ' //*// dparts1-1(D): ' + (dparts[1] - 1) + ' //*// dparts1: ' + dparts[1])
+                                    //window.alert('dparts2(Y): ' + dparts[2] + ' //*// dparts0(M): ' + dparts[0] + ' //*// dparts1-1(D): ' + (dparts[1] - 1) + ' //*// dparts1: ' + dparts[1] + ' //*// tparts0: ' + tparts[0] + ' //*// tparts1: ' + tparts[1] + ' //*// tparts2: ' + tparts[2]);
+                                    window.alert('c.date after: ' + c.date);
                                 }
                                 break;
                             default:
-                                //window.alert('default: Doesn´t look like a date to me. Maybe try again. Good Luck.');
+                                window.alert('default: Doesn´t look like a date to me: ' + c.date);
                                 break;
                         };
 
@@ -656,6 +694,10 @@
                         // Metric.Values: get the metric values.
                         for (var z = 0; z < dp.getColumnHeaderCount(); z++) {
                             c['values' + z] = dp.getMetricValue(i, z).getRawValue()
+                            //getMetricValue raw
+                            //c[dp.getColHeaders(0).getHeader(z).getName()] = dp.getMetricValue(i, z).getRawValue()
+                            //getMetricValue formatted
+                            //c[dp.getColHeaders(0).getHeader(z).getName()] = dp.getMetricValue(i, z).getValue()
                         }
                         // push c to current position in rows-Array. Meaning c.date and c.values, resulting in {"date" : "yyyy-mm-ddThh:mm:ss.000Z" , "values" : 123 , "values0" : 456}
                         rows[i] = c;
@@ -663,9 +705,7 @@
                     //window.alert('new after c.date: ' + JSON.stringify(rows[0]));
                     datapool.rows = rows;
 
- //window.alert("Number of attri and metrics: " + datapool.attrs.length + " and " + datapool.cols.length);
 
-                    // TODO
                     
                     // NOTE Break-By
                     // if there is more than one attribute and only one metric in the dataset, transpose the attribute so different series can be generated and the metric can be displayed against the attribute values

@@ -246,7 +246,7 @@
                                                     style: $WT.CHECKBOXANDLABEL,
                                                     propertyName: "displayFill",
                                                     labelText: "Show Fill",
-                                                    width: "50%"
+                                                    width: "70%"
                                                 },
                                                 {
                                                     style: $WT.STEPPER,
@@ -254,7 +254,7 @@
                                                     propertyName: "amountFillOpacity",
                                                     min: 0,
                                                     max: 10,
-                                                    width: "50%"
+                                                    width: "30%"
                                                 }
                                             ]
                                         }]
@@ -294,6 +294,83 @@
                                                 }
                                             ]
                                         }]
+                                },
+                                //axis lables
+                                {
+                                    style: $WT.EDITORGROUP,
+                                    items: [{
+                                            style: $WT.LABEL,
+                                            labelText: "Axis Format"
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "font color"
+                                                },
+                                                {
+                                                    style: $WT.FILLGROUP,
+                                                    width: "70%",
+                                                    propertyName: "fontColor",
+                                                }
+                                            ]
+                                        },
+                                    ]
+                                },
+                                //Scrollbar Format
+                                {
+                                    style: $WT.EDITORGROUP,
+                                    items: [{
+                                            style: $WT.LABEL,
+                                            labelText: "Scrollbar Format"
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            disabled: this.getHost().getProperty('displayXYChartScrollbar') === "false",
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "background"
+                                                },
+                                                {
+                                                    style: $WT.FILLGROUP,
+                                                    width: "70%",
+                                                    propertyName: "scrollbarBackgroundColor",
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            disabled: this.getHost().getProperty('displayXYChartScrollbar') === "false",
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "thumb"
+                                                },
+                                                {
+                                                    style: $WT.FILLGROUP,
+                                                    width: "70%",
+                                                    propertyName: "scrollbarThumbColor",
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            style: $WT.TWOCOLUMN,
+                                            disabled: this.getHost().getProperty('displayXYChartScrollbar') === "false",
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "unselected"
+                                                },
+                                                {
+                                                    style: $WT.FILLGROUP,
+                                                    width: "70%",
+                                                    propertyName: "scrollbarUnselectedColor",
+                                                }
+                                            ]
+                                        },
+                                    ]
                                 },
                                 // Options Group
                                 {
@@ -339,6 +416,15 @@
                                         }
                                         return x;
                                     })()
+                                },
+                                {
+                                    style: $WT.LABEL,
+                                    labelText: "Version 1.005 (GitHub:RobjSky)"
+                                },
+                                {
+                                    style: $WT.CHECKBOXANDLABEL,
+                                    propertyName: "showMesssages",
+                                    labelText: "Show Msg"
                                 },
                         ]
                     }

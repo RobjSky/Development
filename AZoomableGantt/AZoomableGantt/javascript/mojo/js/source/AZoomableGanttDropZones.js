@@ -9,11 +9,11 @@
         "mstrmojo.array"
     );
 
-    var ZONE_ATTRIBUTES = 'Time Attribute (dd.mm.yy)',
+    var ZONE_ATTRIBUTES = 'Start Time (dd.mm.yyyy hh:MM:ss)',
         ZONE_METRIC = 'Metrics',
-        ZONE_ANNOTATION = 'Attribute or Break-By',
-        ZONE_ANNOTATION2 = 'Attribute or Break-By2',
-        ZONE_ANNOTATION3 = 'Attribute or Break-By3';
+        ZONE_ANNOTATION = 'End Time (dd.mm.yyyy hh:MM:ss)',
+        ZONE_ANNOTATION2 = 'Category Attribute (Y-Axis)',
+        ZONE_ANNOTATION3 = 'Task Attribute';
 
 
     mstrmojo.plugins.AZoomableGantt.AZoomableGanttDropZones = mstrmojo.declare(
@@ -27,27 +27,27 @@
                 // Fill the zones� definition here.
                 return [{
                     name: ZONE_ATTRIBUTES,
-                    title: mstrmojo.desc(13828, 'Drag time attribute here'),
+                    title: mstrmojo.desc(13828, 'Drag start time attribute here'),
                     maxCapacity: 1,
                     allowObjectType: ENUM_ALLOW_DROP_TYPE.ATTRIBUTE
                 }, {
                     name: ZONE_ANNOTATION,
-                    title: mstrmojo.desc(13827, 'Drag attributes here'),
-                    maxCapacity: 20,
+                    title: mstrmojo.desc(13828, 'Drag end time attribute here'),
+                    maxCapacity: 1,
                     allowObjectType: ENUM_ALLOW_DROP_TYPE.ATTRIBUTE
                 }, {
                     name: ZONE_ANNOTATION2,
-                    title: mstrmojo.desc(13827, 'Drag 2attributes here'),
-                    maxCapacity: 20,
+                    title: mstrmojo.desc(13828, 'Drag category here (Y-Axis)'),
+                    maxCapacity: 1,
                     allowObjectType: ENUM_ALLOW_DROP_TYPE.ATTRIBUTE
                 }, {
                     name: ZONE_ANNOTATION3,
-                    title: mstrmojo.desc(13827, 'Drag a3ttributes here'),
-                    maxCapacity: 20,
+                    title: mstrmojo.desc(13828, 'Drag Task here'),
+                    maxCapacity: 10,
                     allowObjectType: ENUM_ALLOW_DROP_TYPE.ATTRIBUTE
                 }, {
                     name: ZONE_METRIC,
-                    title: mstrmojo.desc(13828, 'Drag metrics here'),
+                    title: mstrmojo.desc(13827, 'Drag metrics here'),
                     maxCapacity: 20,
                     allowObjectType: ENUM_ALLOW_DROP_TYPE.METRIC
                 }];
