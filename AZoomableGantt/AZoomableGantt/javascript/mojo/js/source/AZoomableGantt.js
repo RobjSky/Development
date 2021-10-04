@@ -31,13 +31,20 @@
             // Define the CSS class that will be appended to container div
             cssClass: "AZoomableGantt",
             // Define the error message to be displayed if JavaScript errors prevent data from being displayed
-            errorDetails: "This visualization requires one or more attributes and one metric. :-) Expected Date-Format: [dd.mm.yy](-:",
+            errorDetails: "This visualization requires one or more attributes and one metric. :::. Expected Date-Format: [dd.mm.yy(yy)]. Expected DateTime-Format: [dd.mm.yy(yy) hh:mm:ss] .:::",
             // Define the external libraries to be used - in this sample. the amcharts library
             externalLibraries: [{url: "//cdn.amcharts.com/lib/4/core.js"}, {url: "//cdn.amcharts.com/lib/4/charts.js"}, {url: "//cdn.amcharts.com/lib/4/themes/animated.js"}, {url: "//cdn.amcharts.com/lib/4/plugins/rangeSelector.js"}],
             // Define whether a tooltip should be displayed with additional information
             useRichTooltip: true,
             // Define whether the DOM should be reused on data/layout change or reconstructed from scratch
             reuseDOMNode: false,
+
+            /** TODOs:
+             * Threshold with attributes(heat rule 's minValue and maxValue properties. - https://codepen.io/team/amcharts/pen/pLOXgO)
+             * threshold maybe just with 1 Attribute (alert red)
+             * (change boolean from string to boolean)
+             * accept not only date and datetime but also time. first changes have been made to prepareData().case-statement "time"
+             */
 
             plot: function () {
                 var me = this;
@@ -61,7 +68,7 @@
                     InfoboxFillColor: {fillColor: "#c7c7c7", fillAlpha: "100"},
                     InfoboxStrokeColor: {fillColor: "#c7c7c7", fillAlpha: "100"},
                     InfoboxLabelFillColor: {fillColor: "#c7c7c7", fillAlpha: "100"},
-                    minGridDist: 40, //actual default for Y-Axis
+                    minGridDist: 70, //actual default for Y-Axis
                     displayImage: 'false',
                     heightImg: 60,
                     imgPrefix: 'http://bi.kinopolis.de/MicroStrategy/images/kinopolis/film_no/',
@@ -80,6 +87,8 @@
                     amountStrokeXColor: {fillColor: "#A3A3A3", fillAlpha: "50"},
                     amountStrokeYColor: {fillColor: "#A3A3A3", fillAlpha: "50"},
                     weekendFillColor: {fillColor: "#000000", fillAlpha: "20"},
+                    metricFormat: "#,###.00",
+                    showDebugMsgs: 'false',
                 });
 
                 am4core.useTheme(am4themes_animated);
@@ -105,13 +114,22 @@
                 // Add data
                 var datapool = prepareData();
 
-                 //TODO Data needs to be assigned to work properly
-                 if (datapool.attrs.length > 1 && datapool.cols.length < 2) {
-                     chart2.data = datapool.transposedRows;
-                 } else {
-                     chart2.data = datapool.rows;
-                 }
-                 chart2.data = datapool.rows;
+                // Data needs to be assigned to work properly
+                if (datapool.attrs.length > 1 && datapool.cols.length < 2) {
+                    chart2.data = datapool.transposedRows;
+                } else {
+                    chart2.data = datapool.rows;
+                }
+                chart2.data = datapool.rows;
+
+                if (startAttrIsDate == "datetime") {
+                    var formattedDateTime = 'dd.MM.yyyy /+/ hh:mm';
+                    var valDateXFormatted = 'HH:mm';
+                } else if (startAttrIsDate == "date") {
+                    var formattedDateTime = 'dd.MM.yyyy';
+                    var valDateXFormatted = 'dd.MM.yyyy';
+                }
+
 
 
                 // Set Default Colors
@@ -130,9 +148,7 @@
                 //NOTE Create Axis --------------------------------//// Create Axis for date-based X-Axis
                 // category-based X-Axis:
                 var categoryAxis = chart2.yAxes.push(new am4charts.CategoryAxis());
-                //categoryAxis.dataFields.category = "category";
                 categoryAxis.dataFields.category = datapool.attrs[2];
-                //categoryAxis.dataFields.category = "Saal";
                 categoryAxis.renderer.grid.template.location = 0;
                 categoryAxis.renderer.inversed = true;
                 categoryAxis.renderer.minGridDistance = me.getProperty("minGridDist");
@@ -142,14 +158,16 @@
                 categoryAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
 
                 // date-based X-Axis:
+                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('startAttrIsDate: ' + startAttrIsDate) : 0;
                 if (startAttrIsDate == 'false') {
                     window.alert('This wont work. Category-based AttrIsDate = ' + startAttrIsDate)
                 } else {
                     var dateAxis = chart2.xAxes.push(new am4charts.DateAxis());
                     dateAxis.renderer.grid.template.location = 0;
                     dateAxis.renderer.minGridDistance = 70;
+                    //dateAxis.renderer.minGridDistance = me.getProperty("minGridDist");
                     dateAxis.renderer.tooltipLocation = 0;
-                    dateAxis.groupData = 'false';
+                    //dateAxis.groupData = 'false';
                     // Format dateAxis
                     dateAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeXColor").fillColor);
                     dateAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeXColor").fillAlpha * 0.01;
@@ -172,11 +190,10 @@
                             var date = new Date(dataItem.value);
                             if ((date.getDay() == 0 || date.getDay() == 6) && dateAxis.gridInterval.timeUnit == "day" && dateAxis.gridInterval.count == 1) {
                                 dataItem.axisFill.visible = true;
-                                /** Prep in case Highlight Thursdays and Fridays too but with half opacity
-                                } else if ((date.getDay() == 4 || date.getDay() == 5) && dateAxis.gridInterval.timeUnit == "day" && dateAxis.gridInterval.count == 1) {
-                                    dataItem.axisFill.visible = true;
-                                    dataItem.axisFill.fillOpacity = me.getProperty("weekendFillColor").fillAlpha * 0.005;
-                                    */
+                                // Prep in case Highlight Thursdays and Fridays too but with half opacity
+                                //} else if ((date.getDay() == 4 || date.getDay() == 5) && dateAxis.gridInterval.timeUnit == "day" && dateAxis.gridInterval.count == 1) {
+                                 //   dataItem.axisFill.visible = true;
+                                 //   dataItem.axisFill.fillOpacity = me.getProperty("weekendFillColor").fillAlpha * 0.005;
                             } else {
                                 dataItem.axisFill.visible = false;
                             }
@@ -210,27 +227,74 @@
                     metrics4tooltip += push;
                 };
                 if (me.getProperty("showToolTip") === 'true') {
-                    series1.columns.template.tooltipText = "{" + datapool.attrs[3] + "}: \n[bold] {openDateX.formatDate('dd.MM.yyyy HH:mm')} [/] - [bold]{dateX.formatDate('HH:mm')}[/]" + metrics4tooltip;
+                    series1.columns.template.tooltipText = "[bold]{" + datapool.attrs[3] + "}[/]: \n{openDateX.formatDate(formattedDateTime)} - {dateX.formatDate(valDateXFormatted)}" + metrics4tooltip;
                 }
 
 
-                //Thresholds - color series.columns depending on value of first metric from min to max
+
+                // NOTE Thresholds, Heatrules - color series.columns depending on value of first metric from min to max
                 if (me.getProperty("showThreshold") === 'true') {
-                    series1.heatRules.push({
-                        "target": series1.columns.template,
-                        "property": "fill",
-                        //"min": am4core.color("#F5DBCB"),
-                        "min": am4core.color(me.getProperty("minThresholdColor").fillColor),
-                        "max": am4core.color(me.getProperty("maxThresholdColor").fillColor),
-                        "dataField": "valueY"
-                    });
-                    series1.heatRules.push({
-                        "target": series1.columns.template,
-                        "property": "stroke",
-                        "min": am4core.color(me.getProperty("minThresholdColor").fillColor).lighten(-0.5),
-                        "max": am4core.color(me.getProperty("maxThresholdColor").fillColor).lighten(-0.5),
-                        "dataField": "valueY"
-                    });
+                    /* TODO
+                    /**Heatmap basierend auf einzelwerten wie zb ALert red und alert orange. jeder wert ValueY hat zwei individuell e wert red und orange gegen die verglichen werden soll.
+                     * https: //codepen.io/team/amcharts/pen/pLOXgO?editors=0010
+                     * https: //www.amcharts.com/docs/v4/reference/iheatrule/
+                     * https: //www.amcharts.com/docs/v4/concepts/series/#Heat_maps
+                     * Problem: minValue erwartet einen einzelnen wert der für all valueY gilt.
+                     * Lösung:
+                     * Alternative: minmax werte manuell festlegen und ValueY immer so definieren, dass im valueY bereits der vergleich zur Zielgröße enthalten ist
+                     *      Beispiel: ValueY = 25; red = 50; orange = 20
+                     *                  IF ValueY<orange then 0 else ValueY>orange AND ValueY<red then 1 else ValueY>red then 2
+                     *                  min wäre dann 1 und max wäre 2
+                    */
+                    //window.alert('series1.valueY2: ' + JSON.stringify(series1.dataFields.valueY2) + '. minthresholdvalue: ' + me.getProperty("minThresholdValue"));
+                    // depending on wether or not values for min and max threshold are set those values will be used or ignored
+                    // parse string from input to float
+                    let floatMinValue = parseFloat(me.getProperty("minThresholdValue"));
+                    let floatMaxValue = parseFloat(me.getProperty("maxThresholdValue"));
+                    // if min or max is no number igonre the minThresholdValue and maxThresholdValue (isNaN = Not a Number)
+                    if (isNaN(floatMinValue) || isNaN(floatMaxValue)) {
+                        //it's Not a Number
+                        //window.alert('//its a nööö! ' + floatMinValue + '! Max: ' + floatMaxValue);
+
+                        series1.heatRules.push({
+                            "target": series1.columns.template,
+                            "property": "fill",
+                            "min": am4core.color(me.getProperty("minThresholdColor").fillColor),
+                            "max": am4core.color(me.getProperty("maxThresholdColor").fillColor),
+                            "dataField": "valueY"
+                        });
+                        series1.heatRules.push({
+                            "target": series1.columns.template,
+                            "property": "stroke",
+                            "min": am4core.color(me.getProperty("minThresholdColor").fillColor).lighten(-0.5),
+                            "max": am4core.color(me.getProperty("maxThresholdColor").fillColor).lighten(-0.5),
+                            "dataField": "valueY"
+                        });
+                    } else {
+                        //it's a number
+                        //window.alert('//its a number! ' + floatMinValue + '! Max: ' + floatMaxValue);
+
+                        series1.heatRules.push({
+                            "target": series1.columns.template,
+                            "property": "fill",
+                            "min": am4core.color(me.getProperty("minThresholdColor").fillColor),
+                            "max": am4core.color(me.getProperty("maxThresholdColor").fillColor),
+                            "minValue": floatMinValue,
+                            "maxValue": floatMaxValue,
+                            "dataField": "valueY"
+                        });
+                        series1.heatRules.push({
+                            "target": series1.columns.template,
+                            "property": "stroke",
+                            "min": am4core.color(me.getProperty("minThresholdColor").fillColor).lighten(-0.5),
+                            "max": am4core.color(me.getProperty("maxThresholdColor").fillColor).lighten(-0.5),
+                            "minValue": floatMinValue,
+                            "maxValue": floatMaxValue,
+                            "dataField": "valueY"
+                        });
+                    }
+                    
+                    
                 } else {
                     // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
                     series1.columns.template.adapter.add("fill", function (fill, target) {
@@ -267,7 +331,7 @@
                     customizeGrip(chart2.scrollbarX.endGrip);
                 }
 
-                //NOTE customizeGrip() --------------------------------//
+                //NOTE Scrollbar - customizeGrip() --------------------------------//
                 // Style scrollbar
                 function customizeGrip(grip) {
                     // Remove default grip image
@@ -296,9 +360,7 @@
 
 
 
-
-                //NOTE Infobox
-                //Generate Infobox
+                //NOTE InfoBox - Generate Infobox for static tooltip
                 if (me.getProperty("showInfobox") === 'true') {
                     var info = chart2.createChild(am4core.Container);
                     info.padding(10, 10, 10, 10);
@@ -308,7 +370,9 @@
 
                     let title = info.createChild(am4core.Label);
                     title.text = "Title";
-                    title.fontSize = me.getProperty("infoboxTitleSize");
+                    title.fontSize = me.getProperty("infoboxTitleSize")
+
+
 
                     chart2.layout = me.getProperty("positionInfobox");
                     if (me.getProperty("positionInfobox") == "horizontal") {
@@ -333,7 +397,7 @@
                         infoLabelCont.width = me.getProperty("infoboxWidth") - 20;
                         infoLabelCont.fontSize = me.getProperty("infoboxFontSize")
                         infoLabelCont.layout = "grid";
-                        var minTextWidth = me.getProperty("infoboxWidth") * 0.4; // Text wdith is 45% of the entire InfoBox width
+                        var minTextWidth = me.getProperty("infoboxWidth") * 0.4; // Text width is 45% of the entire InfoBox width
                         var txtOpenDateX = infoLabelCont.createChild(am4core.Label); // Date Start Text
                         var valOpenDateX = infoLabelCont.createChild(am4core.Label); // Date Start Value
 
@@ -345,37 +409,33 @@
 
                         txtOpenDateX.text = datapool.attrs[0] + ":";
                         txtOpenDateX.fill = am4core.color("#3d3d3d");
-                        //txtOpenDateX.minWidth = 60;
                         txtOpenDateX.minWidth = minTextWidth;
                         //window.alert('me.getProperty("infoboxWidth"): ' + me.getProperty("infoboxWidth"));
                         txtOpenDateX.marginRight = 5;
                         txtOpenDateX.paddingBottom = 3;
-                        valOpenDateX.text = "dd.MM.yyyy HH:mm";
-                        //valOpenDateX.minWidth = 60;
+                        //valOpenDateX.text = "dd.MM.yyyy HH:mm";
+                        valOpenDateX.text = formattedDateTime;
                         valOpenDateX.minWidth = minTextWidth;
                         valOpenDateX.marginRight = 10;
                         valOpenDateX.fontWeight = "bolder";
 
                         txtDateX.text = datapool.attrs[1] + ":";
                         txtDateX.fill = am4core.color("#3d3d3d");
-                        //txtDateX.minWidth = 60;
                         txtDateX.minWidth = minTextWidth;
                         txtDateX.marginRight = 5;
                         txtDateX.paddingBottom = 3;
-                        valDateX.text = "HH:mm";
-                        //valDateX.minWidth = 60;
+                        //valDateX.text = "HH:mm";
+                        valDateX.text = valDateXFormatted;
                         valDateX.minWidth = minTextWidth;
                         valDateX.marginRight = 10;
                         valDateX.fontWeight = "bolder";
 
                         txtCategoryY.text = datapool.attrs[2] + ":";
                         txtCategoryY.fill = am4core.color("#3d3d3d");
-                        //txtCategoryY.minWidth = 60;
                         txtCategoryY.minWidth = minTextWidth;
                         txtCategoryY.marginRight = 5;
                         txtCategoryY.paddingBottom = 12;
                         valCategoryY.text = "#,###.00";
-                        //valCategoryY.minWidth = 60;
                         valCategoryY.minWidth = minTextWidth;
                         valCategoryY.marginRight = 10;
                         valCategoryY.fontWeight = "bolder";
@@ -417,7 +477,9 @@
                         info.margin(0, 0, 0, 0);
                         info.align = "center";
                         info.background.fillOpacity = 0;
-                        title.fontSize = label.fontSize
+                        title.fontSize = me.getProperty("infoboxFontSize");
+                        title.margin(0, 0, 0, 5);
+                        title.padding(0, 0, 0, 0);
                         title.truncate = false;
                         //title.background.fill = am4core.color(me.getProperty("InfoboxFillColor").fillColor);
                         label.text = "Information";
@@ -429,7 +491,7 @@
                     }
 
 
-                    //NOTE Set up hovering events
+                    //NOTE Hovering - Set up hovering events
                     series1.columns.template.events.on("over", function (ev) {
                         if (me.getProperty("displayImage") == "true" && (datapool.attrs[4]) && me.getProperty("positionInfobox") == "horizontal") {
                             // Update Image
@@ -437,8 +499,9 @@
                             img.href = imgPrefix + imgName + imgSuffix;
                             // Update labels in Infobox
                             title.text = "[bold]" + ev.target.dataItem.task + "[/]\n";
-                            valOpenDateX.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, "dd.MM.yyyy HH:mm");
-                            valDateX.text = chart2.dateFormatter.format(ev.target.dataItem.dateX, "HH:mm");
+                            //valOpenDateX.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, "dd.MM.yyyy HH:mm");
+                            valOpenDateX.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, formattedDateTime);
+                            valDateX.text = chart2.dateFormatter.format(ev.target.dataItem.dateX, valDateXFormatted);
                             valCategoryY.text = ev.target.dataItem.categoryY;
                             //valCategoryY.text = chart2.numberFormatter.format(ev.target.dataItem.valueY, "#,###.00");
                             for (var i = 0; i < numOfMetrics; i++) {
@@ -449,7 +512,7 @@
                         } else {
                             // Update labels in vertical
                             title.text = "[bold]" + ev.target.dataItem.task + "[/]\n";
-                            label.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, "dd.MM.yyyy HH:mm") + " - " + chart2.dateFormatter.format(ev.target.dataItem.dateX, "HH:mm") + sepa;
+                            label.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, formattedDateTime) + " - " + chart2.dateFormatter.format(ev.target.dataItem.dateX, valDateXFormatted) + sepa;
                             label.text += ev.target.dataItem.categoryY + sepa;
                             label.text += datapool.cols[0] + ": " + chart2.numberFormatter.format(ev.target.dataItem.valueY, "#,###.00");
                             label.fill = ev.target.fill;
@@ -462,17 +525,17 @@
                         }
                     });
                 }
-                /** NOTE Make Clickable
-                 * https: //stackoverflow.com/questions/51477177/how-to-add-a-click-hit-event-for-lineseries-in-amcharts-4
-                 * https: //stackoverflow.com/questions/64452378/how-can-i-make-my-amchart4-segments-clickable
-                 * https: //stackoverflow.com/questions/55021098/select-single-column-in-amcharts-4
+                /** NOTE Clickable -- Make Clickable Tasks
+                 * https://stackoverflow.com/questions/51477177/how-to-add-a-click-hit-event-for-lineseries-in-amcharts-4
+                 * https://stackoverflow.com/questions/64452378/how-can-i-make-my-amchart4-segments-clickable
+                 * https://stackoverflow.com/questions/55021098/select-single-column-in-amcharts-4
                 */
                  if (me.getProperty("clickTask") == "true") {
                       var columnTemplate = series1.columns.template;
                       columnTemplate.strokeWidth = 2;
                       columnTemplate.strokeOpacity = 1;
 
-                     columnTemplate.togglable = true;
+                      columnTemplate.togglable = true;
                       var activeState = columnTemplate.states.create("active");
                       if (me.getProperty("fillTask") == "true") {
                           //activeState.properties.fill = am4core.color("#E94F37"); //series.fill.brighten(1);
@@ -484,7 +547,7 @@
                       activeState.properties.stroke = am4core.color(me.getProperty("clickColorStroke").fillColor);
                       //activeState.filters.push(new am4core.DropShadowFilter());
 
-                     // Only one column active at a time
+                      // Only one column active at a time
                       columnTemplate.events.on("hit", function (event) {
                           series1.columns.each(function (column) {
                               //alert("Task: " + JSON.stringify(event.target.dataItem.task) + " index: " + JSON.stringify(event.target.dataItem.task.index));
@@ -502,8 +565,6 @@
                               }
                           })
                       });
-
-
                  }
 
 
@@ -578,29 +639,46 @@
                     } catch (err) {
                         endDigitsCount = 0;
                     };
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('getRowHeaders: ' + dp.getRowHeaders(0).getHeader(0).getName()): 0;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('getRowHeaders1: ' + dp.getRowHeaders(0).getHeader(1).getName()): 0;
+
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('startAttrLength: ' + startAttrLength): 0;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('startDigitsCount: ' + startDigitsCount): 0;
 
                     switch (startAttrLength - startDigitsCount) {
-                        //Date: if attribute has length - digitcount = 2 then we assume a date
+                        //Date: if attribute has length - digitcount = 2 then we assume a date ([dd.mm.yy] or [dd.mm.yyyy] = 2)
                         case 2:
                             startAttrIsDate = "date";
                             AttrCount = 1;
                             break;
-                        //Datetime: if attribute has length(19) - digitcount(14) = 5 then we assume a datetime
+                        //Time: if attribute has length - digitcount = 3 then we assume a time ([hh:mm:ss] or [hh:mm:ss] = 3)
+                        /*
+                        case 3:
+                            startAttrIsDate = "time";
+                            AttrCount = 1;
+                            break;
+                        */
+                        //Datetime: if attribute has length(19) - digitcount(14) = 5 then we assume a datetime ([dd.mm.yy hh:mm:ss] or [dd.mm.yyyy hh:mm:ss] = 5)
                         case 5:
                             startAttrIsDate = "datetime";
                             AttrCount = 1;
                             break;
+                        //case 8:
                         default:
                             startAttrIsDate = "false";
                             AttrCount = 0;
                     }
                     switch (endAttrLength - endDigitsCount) {
-                        //Date: if attribute has length - digitcount = 2 then we assume a date
                         case 2:
                             endAttrIsDate = "date";
                             AttrCount = 2;
                             break;
-                            //Datetime: if attribute has length(19) - digitcount(14) = 5 then we assume a datetime
+                        /*
+                        case 3:
+                            startAttrIsDate = "time";
+                            AttrCount = 1;
+                            break;
+                        */
                         case 5:
                             endAttrIsDate = "datetime";
                             AttrCount = 2;
@@ -609,15 +687,16 @@
                             endAttrIsDate = "false";
                             AttrCount = 0;
                     }
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('startAttrIsDate: ' + startAttrIsDate): 0;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('endAttrIsDate: ' + endAttrIsDate): 0;
 
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('new be4 c.startdate: ' + JSON.stringify(dp.getRowHeaders(0).getHeader(0).getName())): 0;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('new be4 c.enddate: ' + JSON.stringify(dp.getRowHeaders(0).getHeader(1).getName())): 0;
 
-
-                    //window.alert('new be4 c.startdate: ' + JSON.stringify(dp.getRowHeaders(0).getHeader(0).getName()));
-                    //window.alert('new be4 c.enddate: ' + JSON.stringify(dp.getRowHeaders(0).getHeader(1).getName()));
                     //go thru all rows
                     for (i = 0; i < dp.getTotalRows(); i++) {
                         var c = {}
-                        // Attribute.Values: get date from data. date needs to be in the form of dd.mm.yy
+                        // Attribute.Values: get date from data. date needs to be in the form of dd.mm.yy(yy)
                         c.startdate = dp.getRowHeaders(i).getHeader(0).getName();
                         c.enddate = dp.getRowHeaders(i).getHeader(1).getName();
 
@@ -651,9 +730,20 @@
                                 c.startdate = new Date(dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
                                 seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
                                 break;
+                            case "datetime_us":
+                                var parts = c.startdate.split(' ');
+                                //var dparts = parts[0].split('.');
+                                var dparts = parts[0].split(/\.|\//); //split by dot(.) or forwardslash(/)
+                                var tparts = parts[1].split(':');
+                                //c.startdate = new Date('20' + dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
+                                c.startdate = new Date(dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
+                                break;
                             default:
-                                window.alert('default: Doesn´t look like a date to me: ' + c.startdate);
-                                i = dp.getTotalRows();
+                                if (i < 2) {
+                                    window.alert('default (' + i + '): Doesn´t look like a date to me. \nstartdate = ' + c.startdate + '\nExpected Date-Format: [dd.mm.yy(yy)].\nExpected DateTime-Format: [dd.mm.yy(yy) hh:mm:ss]');
+                                }
+                                //i = dp.getTotalRows();
                                 break;
                         };
                         switch (endAttrIsDate) {
@@ -687,8 +777,10 @@
                                 seriesToolTipFormat = "[bold]{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: {valueY}[/]";
                                 break;
                             default:
-                                window.alert('default: Doesn´t look like a date to me: ' + c.enddate);
-                                i = dp.getTotalRows();
+                                if (i < 2) {
+                                    window.alert('default (' + i + '): Doesn´t look like a date to me. \nenddate = ' + c.enddate + '\nExpected Date-Format: [dd.mm.yy(yy)].\nExpected DateTime-Format: [dd.mm.yy(yy) hh:mm:ss]');
+                                }
+                                //i = dp.getTotalRows();
                                 break;
                         };
 
@@ -717,6 +809,8 @@
                         // push c to current position in rows-Array. Meaning c.startdate, c.enddate and c.values, resulting in {"date" : "yyyy-mm-ddThh:mm:ss.000Z" , "values" : 123 , "values0" : 456}
                         rows[i] = c;
                     };
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('new after c.startdate: ' + JSON.stringify(rows[0].DateTime)): 0;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('new after c.enddate: ' + JSON.stringify(rows[0]['datetime ende'])): 0;
                     //window.alert('new after c.startdate: ' + JSON.stringify(rows[0]));
                     datapool.rows = rows;
 
@@ -758,9 +852,9 @@
 
 
                     //------------------ POPUP for Debugging INPUT ------------------//
-                    //var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs);
-                    //var Say2 = "datapool.rows:";
-                    //var myWindow2 = PopUp(Say1, Say2, datapool.rows);
+                    var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs);
+                    var Say2 = "datapool.rows:";
+                    var myWindow2 = (me.getProperty("showDebugMsgs") == 'true') ? PopUp(Say1, Say2, datapool.rows) : 0;
 
                     return datapool;
                  };

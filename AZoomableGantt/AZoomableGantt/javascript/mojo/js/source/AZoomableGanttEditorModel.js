@@ -341,7 +341,7 @@
                                     style: $WT.EDITORGROUP,
                                     items: [{
                                             style: $WT.LABEL,
-                                            labelText: "Grid Lines"
+                                            labelText: "Thresholds / Heatmap"
                                         },
                                         {
                                             style: $WT.CHECKBOXANDLABEL,
@@ -377,7 +377,59 @@
                                                     propertyName: "maxThresholdColor",
                                                 }
                                             ]
-                                        }]
+                                        },
+                                        {
+                                            style: $WT.LABEL,
+                                            width: "30%",
+                                            labelText: "Position262"
+                                        },
+                                        {
+                                            style: $WT.PULLDOWN,
+                                            width: "70%",
+                                            propertyName: "threshold12345",
+                                            items: [{
+                                                    name: "vertical1",
+                                                    value: "vertical1"
+                                                },
+                                                {
+                                                    name: "horizontal1",
+                                                    value: "horizontal1"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            //minThresholdValue
+                                            style: $WT.TWOCOLUMN,
+                                            disabled: this.getHost().getProperty('clickTask') === "false",
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "min value"
+                                                },
+                                                {
+                                                    style: $WT.TEXTBOX,
+                                                    width: "70%",
+                                                    propertyName: "minThresholdValue",
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            //maxThresholdValue
+                                            style: $WT.TWOCOLUMN,
+                                            disabled: this.getHost().getProperty('clickTask') === "false",
+                                            items: [{
+                                                    style: $WT.LABEL,
+                                                    width: "30%",
+                                                    labelText: "max value"
+                                                },
+                                                {
+                                                    style: $WT.TEXTBOX,
+                                                    width: "70%",
+                                                    propertyName: "maxThresholdValue",
+                                                }
+                                            ]
+                                        },
+                                    ]
                                 },
                                 //Grid Lines
                                 {
@@ -500,20 +552,29 @@
                                                     propertyName: "strokeWidth",
                                                     min: 1,
                                                     max: 10,
-                                                }
-                                            ]
+                                                }]
                                         },
                                     ]
                                 },
-                                {
-                                    style: $WT.LABEL,
-                                    labelText: "Version 1.012    (GitHub:RobjSky)"
-                                },
-                                {
-                                    style: $WT.CHECKBOXANDLABEL,
-                                    propertyName: "showMesssages",
-                                    labelText: "Show Msg"
-                                },
+                        ]
+                    },
+                    // Tab amCharts Timeline Format
+                    {
+                        name: 'Help and Notes',
+                        value: [
+                            {
+                                style: $WT.LABEL,
+                                labelText: "Version 1.297    (GitHub:RobjSky)"
+                            },
+                            {
+                                style: $WT.CHECKBOXANDLABEL,
+                                propertyName: "showDebugMsgs",
+                                labelText: "Show Msg"
+                            },
+                            {
+                                style: $WT.LABEL,
+                                labelText: "Help: Date Start and End Function! This function assumes first and second input to be of the date- or datetime-format! Date needs to be in the form of dd.mm.yy(yy) DateTime needs to be in the form of dd.mm.yy(yy) hh:mm:ss"
+                            },
                         ]
                     }
                 ];

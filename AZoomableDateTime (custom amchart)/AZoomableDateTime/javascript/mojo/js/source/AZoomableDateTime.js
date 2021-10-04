@@ -31,7 +31,7 @@
             // Define the CSS class that will be appended to container div
             cssClass: "AZoomableDateTime",
             // Define the error message to be displayed if JavaScript errors prevent data from being displayed
-            errorDetails: "This visualization requires one or more attributes and one metric. :-) Expected Date-Format: [dd.mm.yy](-:",
+            errorDetails: "This visualization requires one or more attributes and one metric. :-) Expected Date-Format: [dd.mm.yyyy](-:",
             // Define the external libraries to be used - in this sample. the amcharts library
             externalLibraries: [{url: "//cdn.amcharts.com/lib/4/core.js"}, {url: "//cdn.amcharts.com/lib/4/charts.js"}, {url: "//cdn.amcharts.com/lib/4/themes/animated.js"}, {url: "//cdn.amcharts.com/lib/4/plugins/rangeSelector.js"}],
             // Define whether a tooltip should be displayed with additional information
@@ -39,13 +39,24 @@
             // Define whether the DOM should be reused on data/layout change or reconstructed from scratch
             reuseDOMNode: false,
 
+            /** Todos:
+             *  Scrollwheel sensitivity
+             * in Category-Mode: spacing Xaxis
+             * in Category-Mode: stacked versus non-stacked
+             * switch to display primary YAxis-Name
+             * Configuring the zoom out button(Configuring the zoom out button)
+             */
+
             plot: function () {
                 var me = this;
                 var domNode = this.domNode,
-                     dp = this.dataInterface;
+                    dp = this.dataInterface;
                 var AttrIsDate = "false";
                 var AttrCount = 0;
-                var seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy')}: {name}: [bold]{valueY}[/]"
+                var seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy')}:\n {name}:\n [bold]{valueY}[/]";
+                var oppositeValueAxisFlag;
+
+
                 // ! Visualisation as Selector
                 this.addUseAsFilterMenuItem();
 
@@ -53,21 +64,38 @@
                     showLegend: 'true',
                     positionLegend: 'top',
                     displayXYCursor: 'true',
+                    hideXYCursorLines: 'false',
+                    displayXYCursorTips: true,
+                    fullWidthCursor: 'false',
                     enableRangeSelector: 'false',
                     enableDataGrouping: 'true',
                     displayWeekendFill: 'false',
                     hideYAxisLabels: 'false',
-                    fontColor: {fillColor: "#000000", fillAlpha: "100"},
-                    amountStrokeXColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
-                    amountStrokeYColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
-                    scrollbarBackgroundColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
-                    scrollbarThumbColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
-                    scrollbarUnselectedColor: {fillColor: "#A3A3A3", fillAlpha: "10"},
-                    weekendFillColor: {fillColor: "#000000", fillAlpha: "20"},
+                    startAtZero: 'false',
+                    enableStacked: 'false',
+                    
+                    amountStrokeXColor: {fillColor: "#ebebeb", fillAlpha: "100"},
+                    amountStrokeYColor: {fillColor: "#ebebeb", fillAlpha: "100"},
+                    fontColor: {fillColor: "#ababab", fillAlpha: "100"},
+                    labelColor: {fillColor: "#ababab", fillAlpha: "100"},
+
+                    selectorColor: {fillColor: "#6c6c6c", fillAlpha: "100"},
+                    selectorBackground: {fillColor: "#f4f4f4", fillAlpha: "10"},
+                    scrollbarBackgroundColor: {fillColor: "#dedede", fillAlpha: "10"},
+                    scrollbarThumbColor: {fillColor: "#ababab", fillAlpha: "30"},
+                    scrollbarUnselectedColor: {fillColor: "#dedede", fillAlpha: "10"},
+                    weekendFillColor: {fillColor: "#000000", fillAlpha: "15"},
                     aggregateValues: 'sum',
-                    metricFormat: "#,###.00",
+                    //metricFormat: "#,###.00",
                     minGridDist: 30,
+                    showDebugMsgs: 'false',
+                    showItemLabels: false,
+                    positionLabel: 'center',
+                    positionVLabel: 'middle',
+                    valuesLegend: 'false'
                 });
+                ;
+                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('Version 1.059') : 0;
 
                 am4core.useTheme(am4themes_animated);
 
@@ -79,6 +107,8 @@
                 chart2.dateFormatter.inputDateFormat = "yyyy-MM-dd HH:mm";
                 if (me.getProperty("enableWheelScroll")) {
                     chart2.mouseWheelBehavior = "panX";
+                    // chart2.mouseWheelBehavior = "zoomX";
+                    // chart2.mouseWheelBehavior = "selectX"
                 };
                 
                 // Export
@@ -101,8 +131,6 @@
                     am4core.color("#65a688")
                 ];
 
-                // Chart Metric Formatter
-                chart2.numberFormatter.numberFormat = me.getProperty("metricFormat");
 
                 // Change Color if different Color-Property is set by user, Colors are set by Index not by Name
                 datapool.cols.forEach((col, i) => {
@@ -125,8 +153,9 @@
                 //NOTE Create Axis --------------------------------//
                 // category-based X-Axis:
                 if (AttrIsDate == 'false') {
-                    //window.alert('category-based AttrIsDate = ' + AttrIsDate)
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('category-based AttrIsDate = ' + AttrIsDate): 0;
                     var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
+                    categoryAxis.cursorTooltipEnabled = (me.getProperty("displayXYCursorTips") === 'true'); //convert string (returned from getProperty) to boolen
                     var label = categoryAxis.renderer.labels.template;
                     //categoryAxis.renderer.labels.template.fill = XAxisColor;
                     label.truncate = true;
@@ -134,25 +163,33 @@
                     label.fill = am4core.color(me.getProperty("fontColor").fillColor);
                 // date-based X-Axis:
                 } else {
-                    //window.alert('date-based AttrIsDate = ' + AttrIsDate)
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('date-based AttrIsDate = ' + AttrIsDate): 0;
                     var dateAxis = chart2.xAxes.push(new am4charts.DateAxis());
-                    dateAxis.renderer.grid.template.location = 0;
                     dateAxis.renderer.minGridDistance = me.getProperty("minGridDist");
+                    dateAxis.cursorTooltipEnabled = (me.getProperty("displayXYCursorTips") === 'true'); //convert string (returned from getProperty) to boolen
+
+                    // Format dateAxis
+                    // https://www.amcharts.com/docs/v4/concepts/axes/positioning-axis-elements/
+                    //dateAxis.renderer.grid.template.location = 0.5;
+                    //dateAxis.renderer.labels.template.location = 0;
+                    //dateAxis.renderer.labels.template.location = 0.5;
+                    //dateAxis.renderer.labels.template.location = 0.0001;
 
                     // Format dateAxis
                     dateAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeXColor").fillColor);
                     dateAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeXColor").fillAlpha * 0.01;
                     dateAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
                     // Set date label formatting (https://www.amcharts.com/docs/v4/concepts/axes/date-axis/#Setting_date_formats)
-                    dateAxis.dateFormats.setKey("day", "dd.MM.");
-                    dateAxis.dateFormats.setKey("week", "'KW'ww");
+                    //dateAxis.dateFormats.setKey("day", "dd.MM.");
+                    //dateAxis.dateFormats.setKey("week", "'KW'ww");
                     dateAxis.periodChangeDateFormats.setKey("hour", "[bold]dd.MMM[/]\nEEE");
                     dateAxis.periodChangeDateFormats.setKey("day", "[bold]dd.MMM[/]");
                     dateAxis.periodChangeDateFormats.setKey("week", "[bold]'KW'ww[/]");
                     dateAxis.periodChangeDateFormats.setKey("month", "[bold]yyyy[/]");
                     
-                    //Data Grouping
-                    dateAxis.groupData = me.getProperty("enableDataGrouping");
+                    // Data Grouping
+                    // https://www.amcharts.com/docs/v4/concepts/axes/date-axis/#Enabling_grouping
+                    dateAxis.groupData = (me.getProperty("enableDataGrouping") === 'true');
                     dateAxis.gridIntervals.pushAll([{timeUnit: "week", count: 1}
                                                   , {timeUnit: "week", count: 2}
                                                   , {timeUnit: "week", count: 3}
@@ -203,8 +240,10 @@
                     if (me.getProperty("enableRangeSelector") === 'true') {
                         var container = document.createElement('div');
                         var rangeselect = document.createElement('div');
-                        rangeselect.style.background = "#c0c0c0";
-                        rangeselect.style.color = "#000";
+                        //rangeselect.style.background = "#c0c0c0";
+                        rangeselect.style.background = am4core.color(me.getProperty("selectorBackground").fillColor);
+                        //rangeselect.style.color = "#000";
+                        rangeselect.style.color = am4core.color(me.getProperty("selectorColor").fillColor);
                         rangeselect.style.position = "absolute";
                         rangeselect.style.bottom = "0px";
                         rangeselect.style.right = "0px";
@@ -226,13 +265,18 @@
                             }
                         });
                     };
-                }
+                };
 
+                //NOTE oppositeAxis-Switches --------------------------------//
                 // translate oppositeAxis-switches to Array, array is then in createSeries check to evaluate whether opposite axis is needed.
-                var oppositeA = []
+                var oppositeA = [];
+                var ownA = [];
                 datapool.cols.forEach((col, i) => {
                            if (me.getProperty("oppositeAxis" + i)) {
                                oppositeA[i] = me.getProperty("oppositeAxis" + i);
+                           };
+                           if (me.getProperty("ownAxis" + i)) {
+                               ownA[i] = me.getProperty("ownAxis" + i);
                            }
                 });
 
@@ -244,142 +288,359 @@
                 valueAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
                 valueAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
 
-                // TODO
+                // Axis Metric Formatter
+                if (me.getProperty("metricFormat" + 0) !== undefined) {
+                    valueAxis.numberFormatter = new am4core.NumberFormatter();
+                    valueAxis.numberFormatter.numberFormat = me.getProperty("metricFormat" + 0);
+                }
+
+                // Start Value Axis always at Zero
+                if (me.getProperty("startAtZero") === 'true') {
+                    valueAxis.min = 0;
+                    valueAxis.strictMinMax = true;
+                }
+
                 if (me.getProperty("hideYAxisLabels") === 'true') {
                     valueAxis.renderer.labels.template.disabled = true;
                     valueAxis.cursorTooltipEnabled = false;
                 } else {
                     valueAxis.renderer.labels.template.disabled = false;
-                    valueAxis.cursorTooltipEnabled = true;
+                    valueAxis.cursorTooltipEnabled = (me.getProperty("displayXYCursorTips") === 'true');
                 }
 
                 //NOTE createSeries() --------------------------------//
                 function createSeries(field, name, hiddenInLegend) {
                     var series, bullet;
+                    // extract the index i from field = "value+i"
+                    var j = Number(field.substring(field.length - 1, field.length));
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('104: j set' + j): 0;
 
                     if (AttrIsDate == 'false') {
-                        // None-Date-Block (to be executed if attribute is no date and therefore series must be created for values of attribute(Country: Italy,Germany,Spain))
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('category-based AttrIsDate = ' + AttrIsDate): 0;
+                        // None-Date-Block (to be executed if attribute is no date and therefore series must be created for values of attribute(Country: Italy, Germany, Spain))
                         categoryAxis.dataFields.category = "date";
                         categoryAxis.renderer.grid.template.location = 0;
-                        
+
                         var label = categoryAxis.renderer.labels.template;
                         label.wrap = true;
                         label.maxWidth = 120;
-/*
-                        // Auto-rotating labels
-                        categoryAxis.events.on("sizechanged", function (ev) {
-                            var axis = ev.target;
-                            var cellWidth = axis.pixelWidth / (axis.endIndex - axis.startIndex);
-                            if (cellWidth < axis.renderer.labels.template.maxWidth) {
-                                axis.renderer.labels.template.rotation = -45;
-                                axis.renderer.labels.template.horizontalCenter = "right";
-                                axis.renderer.labels.template.verticalCenter = "middle";
-                            } else {
-                                axis.renderer.labels.template.rotation = 0;
-                                axis.renderer.labels.template.horizontalCenter = "middle";
-                                axis.renderer.labels.template.verticalCenter = "top";
-                            }
-                        });
 
-                        // Selectively offsetting axis labels
-                        categoryAxis.renderer.labels.template.adapter.add("dy", function (dy, target) {
-                            if (target.dataItem && target.dataItem.index & 2 == 2) {
-                                return dy + 25;
-                            }
-                            return dy;
-                        });
-*/
                         series = chart2.series.push(new am4charts.ColumnSeries());
                         series.name = name;
                         series.dataFields.valueY = field;
                         series.dataFields.categoryX = "date";
-                        series.tooltipText = "{name}:\n {valueY}";
-                        series.stacked = true;
 
-                        bullet = series.bullets.push(new am4charts.LabelBullet());
-                        bullet.dy = 15;
-                        bullet.label.text = '{valueY}';
-                        bullet.label.fill = am4core.color('#ffffff');
-                        // truncate and hideOversized: hide column labels when bigger than column, truncate false to prevent text cropping
-                        bullet.label.truncate = false;
-                        bullet.label.hideOversized = true;
+
+
+
+                        // KARINA
+                        /**
+                         * https://www.amcharts.com/docs/v4/concepts/tooltips/
+                         * https://www.amcharts.com/docs/v4/concepts/formatters/formatting-numbers/#Examples
+                         * https://www.amcharts.com/docs/v4/concepts/formatters/formatting-strings/#In_line_formatting
+                         */
+
+                        //FIXME
+                        let metricform = me.getProperty("metricFormat" + j);
+                        series.valueformat = ("'U8nit' 000.00 j=" + j);
+                        let valueformat = ("'U8nit' 000.00 j=" + j);
+                        series.tooltipText = "Testing: {name}:\n {valueY}";
+                        window.alert("metricform: " + metricform + " // J: " + j);
+                        window.alert('s.name: ' + series.name + ' J: ' + j + ' metricf: ' + me.getProperty("metricFormat" + j));
+                        //series.numberFormatter.numberFormat = ("'U8nit' 000.00 j=" + j);
+                        series.numberFormatter.numberFormat = "(" + metricform + ")";
+                        
+
+                        // Inline Formatting:
+                        //series.tooltipText = "{valueY.formatNumber('" + mform +"')} mil6es:: " + name;
+                        //series.tooltipText = "{name}:\n Testen:\n {valueY.formatNumber('###.0000')}"
+                        //window.alert("{name}:\n Testen:\n {valueY.formatNumber(" + metricform + ")}")
+
+                        //series.tooltipText = "{name}:\n {valueY.formatNumber('#.0')}";
+
+                        // KARINA
+
+
+
+
+                        //show values inside chart
+                        if (me.getProperty("showItemLabels") === "true" && me.getProperty("valuesLegend") === "false") {
+                            let valueLabel = series.columns.template.createChild(am4core.Label);
+                            valueLabel.text = "{valueY}";
+                            //valueLabel.text = "{valueY.formatNumber("+ me.getProperty("metricFormat" + 0)+")}"
+                            //valueLabel.fontSize = 20;
+                            valueLabel.align = me.getProperty("positionLabel");     // "left" | "center" | "right" | "none"
+                            valueLabel.valign = me.getProperty("positionVLabel");   // "top" | "middle" | "bottom" | "none"
+                            
+                            valueLabel.fill = am4core.color(me.getProperty("labelColor").fillColor);
+                            //valueLabel.dx = 10;
+                            //valueLabel.locationY = 0.5; // 0 = Top, 1 = Bottom, 0.5 = Middle
+                            valueLabel.strokeWidth = 0;
+                            valueLabel.paddingTop = 3;
+                            valueLabel.paddingBottom = 3;
+                            // truncate and hideOversized: hide column labels when bigger than column, truncate false to prevent text cropping
+                            valueLabel.truncate = false;
+                            valueLabel.hideOversized = true;
+                        };
                     } else {
                         // Date-Block
-                        //window.alert('createSeries Date-Block AttrIsDate: ' + AttrIsDate);
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('createSeries Date-Block AttrIsDate: ' + AttrIsDate): 0;
                         series = chart2.series.push(new am4charts.LineSeries());
                         series.name = name;
                         series.dataFields.valueY = field;
                         series.dataFields.dateX = "date";
                         series.groupFields.valueY = me.getProperty("aggregateValues");
                         series.minBulletDistance = 15;
-                        //TODO createSeries() --------------------------------//
-                        //series.tooltipText = "{dateX.formatDate('dd.MM.yyyy')}: {name}: [b]{valueY}[/]";
                         series.tooltipText = seriesToolTipFormat;
 
                         bullet = series.bullets.push(new am4charts.CircleBullet());
                         bullet.circle.stroke = am4core.color("#fff");
                         bullet.circle.strokeWidth = 1;
                         bullet.circle.radius = 3;
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('101/l.339'): 0;
+                    }
+
+                    //NOTE createSeries(): Values in Legend --------------------------------//
+                    if (me.getProperty("valuesLegend") === "true") {
+                        //if (me.getProperty("valuesLegend")) {
+                        // show values in legend
+                        series.legendSettings.itemValueText = "[bold]{valueY}[/bold]";
+                        series.tooltip.disabled = true;
+                    }
+
+                    //NOTE createSeries(): stacked or non-stacked --------------------------------//
+                    if (me.getProperty("enableStacked") === 'true') {
+                        series.stacked = true;
+                    } else {
+                        series.stacked = false;
                     }
 
                     series.strokeWidth = 2;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('102'): 0;
                     if (me.getProperty("displayFill") === 'true') {
                         series.fillOpacity = me.getProperty("amountFillOpacity")/10;
                     }
                     if (hiddenInLegend) {
                         series.hiddenInLegend = true;
                     }
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('103: non'): 0;
 
+                    //NOTE createSeries(): combined Tooltip --------------------------------//
+                    if (me.getProperty("combineTooltip") === 'true' && me.getProperty("singleTooltip") === 'true') {
+                        // Set up tooltip
+                        series.adapter.add("tooltipText", function (ev) {
+                            var text = "[bold]{dateX}[/]\n"
+                            chart2.series.each(function (item) {
+                                if (!item.isHidden) {
+                                    text += "[" + item.stroke.hex + "]●[/] " + item.name + ": {" + item.dataFields.valueY + "}\n";
+                                }
+                            });
+                            return text;
+                        });
 
-                    // extract the index from field = "value+i"
-                    var j = Number(field.substring(field.length - 1, field.length))
+                        series.tooltip.getFillFromObject = false;
+                        series.tooltip.background.fill = am4core.color(me.getProperty("selectorBackground").fillColor);
+                        series.tooltip.label.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                        // Prevent cross-fading of tooltips
+                        series.tooltip.defaultState.transitionDuration = 0;
+                        series.tooltip.hiddenState.transitionDuration = 0;
+                    }
+
+                    //NOTE createSeries(): Opposite Axis --------------------------------//
                     // check whether oppositeA has a true at that index, if so create opposite Axis
                     if (oppositeA[j] == 'true') {
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('105 Start oppositeA[j] == true'): 0;
                         // Create new ValueAxis
                         var valueAxis2 = chart2.yAxes.push(new am4charts.ValueAxis());
                         valueAxis2.syncWithAxis = valueAxis;
                         // Name Value Axis and set it to opposite
                         valueAxis2.title.text = series.name;
-                        //valueAxis2.renderer.labels.template.fill = YAxisColor;
                         valueAxis2.renderer.opposite = true;
                         valueAxis2.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
                         valueAxis2.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
-                        valueAxis2.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                        
+                        if (me.getProperty("hideYAxisLabels") === 'true') {
+                            valueAxis2.renderer.labels.template.disabled = true;
+                            valueAxis2.cursorTooltipEnabled = false;
+                        } else {
+                            valueAxis2.renderer.labels.template.disabled = false;
+                            valueAxis2.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                            //valueAxis2.cursorTooltipEnabled = true;
+                            valueAxis2.cursorTooltipEnabled = me.getProperty("displayXYCursorTips");
+                        }
+                        // Axis Metric Formatter
+                        if (me.getProperty("metricFormat" + j) !== undefined) {
+                            valueAxis2.numberFormatter = new am4core.NumberFormatter();
+                            valueAxis2.numberFormatter.numberFormat = me.getProperty("metricFormat" + j);
+
+
+                            // KARINA
+                            //FIXME
+                            //series.tooltipText = "{name}:\n {valueY.formatNumber(''Unit' 000.00')}";
+                            /*
+                            series.numberFormatter.numberFormat = ("'U2nit' 000.00 j="+j);
+                            chart2.series.each(function (item, index) {
+                                //window.alert('s.name: ' + series.name + ' J: ' + j + ' index: ' + index + ' metricf: ' + me.getProperty("metricFormat" + index));
+                                //item.numberFormatter.numberFormat = ("'U3nit' 000.00 j=" + j);
+                                item.numberFormatter.numberFormat = (me.getProperty("metricFormat" + index));
+                                if (index == 0) {
+                                    //window.alert('sjup')
+                                    item.numberFormatter.numberFormat = "'te3st' #.";
+                                } else {
+                                    //window.alert('sjup2')
+                                    item.numberFormatter.numberFormat = "'tizz' #.00";
+                                }
+                            });
+                            */
+                           // KARINA
+                        }
+
+
+
+
+
+
                         // assign axis to current series
                         series.yAxis = valueAxis2;
-                    }
+                        
+                       {
+                        /* ownAxis
+                        var valueAxis2 = chart2.yAxes.push(new am4charts.ValueAxis());
+                        //window.alert('J: ' + j + ' //oppositeA[j]: ' + oppositeA[j] + ' //ownA[j]: ' + ownA[j])
+                        if (ownA[j] == 'true') {
+                            //window.alert('1. own')
+                            // Create new ValueAxis
+                            let valueAxisOwn = chart2.yAxes.push(new am4charts.ValueAxis());
+                            valueAxisOwn.syncWithAxis = valueAxis;
+                            // Name Value Axis and set it to opposite
+                            valueAxisOwn.title.text = series.name;
+                            valueAxisOwn.renderer.opposite = true;
+                            valueAxisOwn.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
+                            valueAxisOwn.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
+                            valueAxisOwn.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                            // Axis Metric Formatter
+                            if (me.getProperty("metricFormat" + j) !== undefined) {
+                                valueAxisOwn.numberFormatter = new am4core.NumberFormatter();
+                                valueAxisOwn.numberFormatter.numberFormat = me.getProperty("metricFormat" + j);
+                            }
+                            // assign axis to current series
+                            series.yAxis = valueAxisOwn;
+                        //} else if (typeof (ownA[j]) == "undefined" || ownA[j] == 'false') {
+                        } else {
+                            //window.alert('2. NOT own')
+                            if (oppositeValueAxisFlag == 1) {
+                                //window.alert('3. jippie: ' + oppositeValueAxisFlag);
+                                //valueAxis2.title.text += series.name;
+                                series.yAxis = valueAxis2;
+                            } else {
+                                // Create new ValueAxis
+                                //var valueAxis2 = chart2.yAxes.push(new am4charts.ValueAxis());
+                                oppositeValueAxisFlag = 1;
+                                //window.alert('4. set: ' + oppositeValueAxisFlag);
+
+                                valueAxis2.syncWithAxis = valueAxis;
+                                // Name Value Axis and set it to opposite
+                                valueAxis2.title.text = series.name;
+                                valueAxis2.renderer.opposite = true;
+                                valueAxis2.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
+                                valueAxis2.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
+                                valueAxis2.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                                // Axis Metric Formatter
+                                if (me.getProperty("metricFormat" + j) !== undefined) {
+                                    valueAxis2.numberFormatter = new am4core.NumberFormatter();
+                                    valueAxis2.numberFormatter.numberFormat = me.getProperty("metricFormat" + j);
+                                }
+                                // assign axis to current series
+                                series.yAxis = valueAxis2;
+                            }
+
+                            
+
+                        }
+                        */
+                       }
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('105: While oppositeA[j] == true'): 0;
+                    };
+
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('106: After oppositeA[j] == true'): 0;
                     return series;
-                }
+                    
+                };
+                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('107: After function createSeries()'): 0;
 
                 let allSeries = [];
 
                 //NOTE Call Series --------------------------------//
                 // no Break-By
-                if        (datapool.attrs.length == 1) {
-                    //window.alert('ah kein breakBy')
+                if (datapool.attrs.length == 1) {
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('108: no break-by'): 0;
                     datapool.cols.forEach((col, i) => {
                         var s = createSeries("values" + i, col);
                         allSeries.push(s);
                     })
                 // Break-By
                 } else if (datapool.attrs.length > 1 && datapool.cols.length == 1) {
-                    //window.alert('Guck mal ein breakBy')
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('109: break-by found'): 0;
                     datapool.transMetricNames.forEach((col, i) => {
                         var s = createSeries(col, col);
                         allSeries.push(s);
                     })
                 } else if (datapool.attrs.length > 1 && datapool.cols.length > 1) {
-                    window.alert(datapool.attrs.length + ' Attributes and ' + datapool.cols.length + ' Metrics is too much for this Visualization to handle.')
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('110: break-by found with too many metrics!'): 0;
+                    window.alert(datapool.attrs.length + ' Attributes and ' + datapool.cols.length + ' Metrics is too much for this Visualization to handle. Valid Combinations: \n1 (Time)Attribute and 1 to multiple Metrics \n2 (Time)Attribute and 1 Metric')
                 };
 
 
                 // And, for a good measure, let's add a legend and a cursor
                 if (me.getProperty("showLegend") === 'true') {
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('111: showLegend is true!'): 0;
                     chart2.legend = new am4charts.Legend();
                     chart2.legend.position = me.getProperty("positionLegend");
-                }
+                    chart2.legend.scrollable = true;
+                    chart2.legend.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                    chart2.legend.valueLabels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+
+                    if (me.getProperty("padLegend") === 'true') {
+                        chart2.legend.itemContainers.template.paddingTop = me.getProperty("padLegendAmount");
+                        chart2.legend.itemContainers.template.paddingBottom = me.getProperty("padLegendAmount");
+                        chart2.legend.itemContainers.template.paddingLeft = me.getProperty("padLegendAmount");
+                        chart2.legend.itemContainers.template.paddingRight = me.getProperty("padLegendAmount");
+                    };
+
+                    if (me.getProperty("maxHeightLegend") === 'true') {
+                        chart2.legend.maxHeight = me.getProperty("maxHeightLegendAmount");
+                    };
+                    if (me.getProperty("maxWidthLegend") === 'true') {
+                        chart2.legend.maxWidth = me.getProperty("maxWidthLegendAmount");
+                    };
+                    if (me.getProperty("sizeMarkerLegend") === 'true') {
+                        chart2.legend.markers.template.width = me.getProperty("sizeMarkerLegendAmount");
+                        chart2.legend.markers.template.height = me.getProperty("sizeMarkerLegendAmount");
+                    };
+                    
+                };
                 if (me.getProperty("displayXYCursor") === 'true') {
                     chart2.cursor = new am4charts.XYCursor();
+                    chart2.cursor.lineY.disabled = (me.getProperty("hideXYCursorLines") === 'true');
+                    chart2.cursor.lineX.disabled = (me.getProperty("hideXYCursorLines") === 'true');
+
+                    if (me.getProperty("fullWidthCursor") === 'true') {
+                        if (AttrIsDate == 'false') {
+                            chart2.cursor.xAxis = categoryAxis;
+                        } else {
+                            chart2.cursor.xAxis = dateAxis;
+                        }
+                        chart2.cursor.fullWidthLineX = true;
+                        //chart2.cursor.lineX.fill = am4core.color("#8F3985");
+                        chart2.cursor.lineX.fill = am4core.color(me.getProperty("scrollbarThumbColor").fillColor);
+                        //chart2.cursor.lineX.fillOpacity = 0.1;
+                        chart2.cursor.lineX.fillOpacity = me.getProperty("scrollbarThumbColor").fillAlpha * 0.01;
+                        chart2.cursor.lineY.disabled = true;
+                    }
+                    //chart2.cursor.fullWidthLineX = (me.getProperty("hideXYCursorLines") === 'true');
+                    if (me.getProperty("singleTooltip") === 'true') {
+                        chart2.cursor.maxTooltipDistance = 0;
+                    };
                 }
 
                 // Create a horizontal scrollbar with preview and place it underneath the date axis
@@ -388,34 +649,18 @@
                     chart2.scrollbarX = new am4charts.XYChartScrollbar();
                     chart2.scrollbarX.minHeight = 40;
 
-
-
-
                     // Customize scrollbar background, when hovered
-                    //chart2.scrollbarX.background.fill = am4core.color("#c4c4c4");
                     chart2.scrollbarX.background.fill = am4core.color(me.getProperty("scrollbarBackgroundColor").fillColor);
-                    //chart2.scrollbarX.background.fillOpacity = 0.2;
                     chart2.scrollbarX.background.fillOpacity = me.getProperty("scrollbarBackgroundColor").fillAlpha * 0.01;
-
                     //chart2.scrollbarX.stroke = am4core.color("red");
                     //chart2.scrollbarX.background.filters.clear();
+
                     // Customize scrollbar background, when unhovered
-                    //chart2.scrollbarX.thumb.background.fill = am4core.color("#b0b0b0");
-                    //chart2.scrollbarX.thumb.background.fillOpacity = 0.3;
                     chart2.scrollbarX.thumb.background.fill = am4core.color(me.getProperty("scrollbarThumbColor").fillColor);
                     chart2.scrollbarX.thumb.background.fillOpacity = me.getProperty("scrollbarThumbColor").fillAlpha * 0.01;
                     // Unselected area
-                    //chart2.scrollbarX.unselectedOverlay.fill = am4core.color("#c3c3c3");
-                    //chart2.scrollbarX.unselectedOverlay.fillOpacity = 0.7;
                     chart2.scrollbarX.unselectedOverlay.fill = am4core.color(me.getProperty("scrollbarUnselectedColor").fillColor);
                     chart2.scrollbarX.unselectedOverlay.fillOpacity = me.getProperty("scrollbarUnselectedColor").fillAlpha * 0.01;
-                    
-
-
-
-
-
-
 
 
                     chart2.scrollbarX.series.push(allSeries[0]);
@@ -427,10 +672,12 @@
                     customizeGrip(chart2.scrollbarX.startGrip);
                     customizeGrip(chart2.scrollbarX.endGrip);
                 }
+                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('110'): 0;
 
                 //NOTE customizeGrip() --------------------------------//
                 // Style scrollbar
                 function customizeGrip(grip) {
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('111'): 0;
                     // Remove default grip image
                     grip.icon.disabled = true;
 
@@ -559,24 +806,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 // NOTE prepareData()
                 // https://www2.microstrategy.com/producthelp/2020/VisSDK/Content/topics/HTML5/DataInterfaceAPI.htm
                 // https://www2.microstrategy.com/producthelp/Current/VisSDK/Content/topics/HTML5/DataInterfaceAPI.htm#DataInterface
@@ -639,11 +868,14 @@
                     //go thru all rows
                     for (i = 0; i < dp.getTotalRows(); i++) {
                         var c = {}
-                        // Attribute.Values: get date from data. date needs to be in the form of dd.mm.yy
+                        // Attribute.Values: get date from data. date needs to be in the form of dd.mm.yyyy
                         c.date = dp.getRowHeaders(i).getHeader(0).getName();
 
                         switch (AttrIsDate) {
                             case "date":
+                                if (i < 1) {
+                                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('c.date before: ' + c.date): 0;
+                                }
                                 if (c.date.indexOf('.') > -1) {
                                     var parts = c.date.split('.');
                                     if (parts[2].length == 2) {
@@ -660,26 +892,37 @@
                                     // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
                                     c.date = new Date(parts[2], parts[0] - 1, parts[1]);
                                 }
-                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy')}:\n {name}:\n [bold]{valueY}[/]"
                                 break;
                             
                             case "datetime":
-                                if (i < 2) {
-                                    window.alert('c.date before: ' + c.date);
+                                if (i < 1) {
+                                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('c.datetime before: ' + c.date): 0;
                                 }
                                 var parts = c.date.split(' ');
                                 //var dparts = parts[0].split('.');
                                 var dparts = parts[0].split(/\.|\//); //split by dot(.) or forwardslash(/)
                                 var tparts = parts[1].split(':');
                                 c.date = new Date(dparts[2], dparts[1] - 1, dparts[0], tparts[0], tparts[1], tparts[2]);
-                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
-                                if (i < 2) {
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}:\n {name}:\n [bold]{valueY}[/]"
+                                if (i < 1 && me.getProperty("showDebugMsgs") == 'true') {
                                     //window.alert('dparts2(Y): ' + dparts[2] + ' //*// dparts0(M): ' + dparts[0] + ' //*// dparts1-1(D): ' + (dparts[1] - 1) + ' //*// dparts1: ' + dparts[1] + ' //*// tparts0: ' + tparts[0] + ' //*// tparts1: ' + tparts[1] + ' //*// tparts2: ' + tparts[2]);
-                                    window.alert('c.date after: ' + c.date);
+                                    var newLine = "\r\n"
+                                    var msg = 'c.datetime after: ' + c.date
+                                    msg += newLine;
+                                    msg += "c.toUTCString: " + c.date.toUTCString();
+                                    msg += newLine;
+                                    msg += 'c.toISOString: ' + c.date.toISOString();
+                                    msg += newLine;
+                                    msg += 'c.toLocaleTimeString: ' + c.date.toLocaleTimeString();
+                                    msg += newLine;
+                                    msg += 'c.toLocaleString: ' + c.date.toLocaleString();
+                                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert(msg): 0;
+                                    alert(msg);
                                 }
                                 break;
                             default:
-                                window.alert('default: Doesn´t look like a date to me: ' + c.date);
+                                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('default: Doesn´t look like a date to me: ' + c.date): 0;
                                 break;
                         };
 
@@ -694,6 +937,8 @@
                         // Metric.Values: get the metric values.
                         for (var z = 0; z < dp.getColumnHeaderCount(); z++) {
                             c['values' + z] = dp.getMetricValue(i, z).getRawValue()
+                            //https://www2.microstrategy.com/producthelp/Current/VisSDK/Content/topics/HTML5/DataInterfaceAPI.htm#MetricValue
+                            //c['values' + z] = dp.getMetricValue(i, z).getValue()
                             //getMetricValue raw
                             //c[dp.getColHeaders(0).getHeader(z).getName()] = dp.getMetricValue(i, z).getRawValue()
                             //getMetricValue formatted
@@ -706,7 +951,7 @@
                     datapool.rows = rows;
 
 
-                    
+
                     // NOTE Break-By
                     // if there is more than one attribute and only one metric in the dataset, transpose the attribute so different series can be generated and the metric can be displayed against the attribute values
                     if (datapool.attrs.length > 1 && datapool.cols.length < 2) {
@@ -743,14 +988,23 @@
 
 
                     //------------------ POPUP for Debugging INPUT ------------------//
-                    //var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs);
-                    //var Say2 = "datapool.rows:";
+                    //if (datapool.transMetricNames){
+                    if (datapool.hasOwnProperty('transMetricNames')) {
+                        //alert('jippie transmetric');
+                        var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs) + '\n datapool.transMetricNames: ' + JSON.stringify(datapool.transMetricNames);
+                    } else {
+                        var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs);
+                    };
+                    //var Say1 = 'DataPool: \n datapool.cols: ' + JSON.stringify(datapool.cols) + '\n datapool.attrs: ' + JSON.stringify(datapool.attrs); // + '\n datapool.transMetricNames: ' + JSON.stringify(datapool.transMetricNames);
+                    var Say2 = "datapool.rows:";
                     //var myWindow2 = PopUp(Say1, Say2, datapool.rows);
+                    var myWindow2 = (me.getProperty("showDebugMsgs") == 'true') ? PopUp(Say1, Say2, datapool.rows) : 0;
 
                     return datapool;
                  };
 
                  //------------------ POPUP for Debugging INPUT ------------------//
+                 // For Debugging in Firefox --> Delete Cookies and Website Data then F12 --> Network Analysis --> Cache deactivate --> CTRL+Shift+R
                  // var Say1 = 'metricColors: <br>' + JSON.stringify(metricColors)
                  //   + ' <br> metricColors[0]: <br>' + JSON.stringify(metricColors[0]);
                  // var Say2 = 'me.getProperty("lineColor0"): <br>' + JSON.stringify(me.getProperty("lineColor0"))
@@ -759,7 +1013,7 @@
                  // NOTE POPUP() for Debugging ------------------//
                  function PopUp(Say1, Say2, displaydata) {
                      var myWindow = window.open("", "", "width=600,height=500");
-                     
+
                      myWindow.document.write("<h1>Debugger Output:</h1>");
 
                      var p1 = document.createElement("P")
