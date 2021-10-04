@@ -32,7 +32,8 @@
                     name: ZONE_ANNOTATION,
                     title: mstrmojo.desc(13827, 'Drag attributes here'),
                     maxCapacity: 20,
-                    allowObjectType: ENUM_ALLOW_DROP_TYPE.ATTRIBUTE
+                    allowObjectType: ENUM_ALLOW_DROP_TYPE.ATTRIBUTE,
+                    //isColorBy: true
                 }, {
                     name: ZONE_METRIC,
                     title: mstrmojo.desc(13828, 'Drag metrics here'),
