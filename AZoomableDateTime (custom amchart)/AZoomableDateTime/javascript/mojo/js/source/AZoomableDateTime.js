@@ -31,7 +31,7 @@
             // Define the CSS class that will be appended to container div
             cssClass: "AZoomableDateTime",
             // Define the error message to be displayed if JavaScript errors prevent data from being displayed
-            errorDetails: "This visualization requires one or more attributes and one metric. :-) Expected Date-Format: [dd.mm.yyyy](-:",
+            errorDetails: "This visualization requires one or more attributes and one metric. <br>Expected Date-Format: [dd.mm.yyyy]. <br>Expected Date-Time Format: [dd.mm.yyyy hh:mm:ss]",
             // Define the external libraries to be used - in this sample. the amcharts library
             externalLibraries: [{url: "//cdn.amcharts.com/lib/4/core.js"}, {url: "//cdn.amcharts.com/lib/4/charts.js"}, {url: "//cdn.amcharts.com/lib/4/themes/animated.js"}, {url: "//cdn.amcharts.com/lib/4/plugins/rangeSelector.js"}],
             // Define whether a tooltip should be displayed with additional information
@@ -55,10 +55,10 @@
                 var AttrCount = 0;
                 var seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy')}:\n {name}:\n [bold]{valueY}[/]";
                 var oppositeValueAxisFlag;
+                var diff;
 
 
-                // ! Visualisation as Selector
-                this.addUseAsFilterMenuItem();
+                
 
                 this.setDefaultPropertyValues({
                     showLegend: 'true',
@@ -73,9 +73,12 @@
                     hideYAxisLabels: 'false',
                     startAtZero: 'false',
                     enableStacked: 'false',
+                    VizAsSelect: 'false',
                     
                     amountStrokeXColor: {fillColor: "#ebebeb", fillAlpha: "100"},
                     amountStrokeYColor: {fillColor: "#ebebeb", fillAlpha: "100"},
+                    axisXColor: {fillColor: "#ebebeb", fillAlpha: "100"},
+                    axisYColor: {fillColor: "#ebebeb", fillAlpha: "100"},
                     fontColor: {fillColor: "#ababab", fillAlpha: "100"},
                     labelColor: {fillColor: "#ababab", fillAlpha: "100"},
 
@@ -105,11 +108,7 @@
                 chart2.hiddenState.properties.opacity = 0; // this creates initial fade-in
                 chart2.dateFormatter.dateFormat = "yyyy-MM-dd hh:mm";
                 chart2.dateFormatter.inputDateFormat = "yyyy-MM-dd HH:mm";
-                if (me.getProperty("enableWheelScroll")) {
-                    chart2.mouseWheelBehavior = "panX";
-                    // chart2.mouseWheelBehavior = "zoomX";
-                    // chart2.mouseWheelBehavior = "selectX"
-                };
+                chart2.mouseWheelBehavior = me.getProperty("behaviorWheelScroll"); // "panX", "zoomX", "selectX"
                 
                 // Export
                 //chart.exporting.menu = new am4core.ExportMenu();
@@ -155,7 +154,13 @@
                 if (AttrIsDate == 'false') {
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('category-based AttrIsDate = ' + AttrIsDate): 0;
                     var categoryAxis = chart2.xAxes.push(new am4charts.CategoryAxis());
-                    categoryAxis.cursorTooltipEnabled = (me.getProperty("displayXYCursorTips") === 'true'); //convert string (returned from getProperty) to boolen
+                    categoryAxis.cursorTooltipEnabled = (me.getProperty("displayXYCursorTips") === 'true'); //convert string (returned from getProperty) to boolean
+                    categoryAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeXColor").fillColor);
+                    categoryAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeXColor").fillAlpha * 0.01;
+                    categoryAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                    //categoryAxis.renderer.line.strokeWidth = 2;
+                    categoryAxis.renderer.line.stroke = am4core.color(me.getProperty("axisXColor").fillColor);
+                    categoryAxis.renderer.line.strokeOpacity = me.getProperty("axisXColor").fillAlpha * 0.01;
                     var label = categoryAxis.renderer.labels.template;
                     //categoryAxis.renderer.labels.template.fill = XAxisColor;
                     label.truncate = true;
@@ -179,6 +184,9 @@
                     dateAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeXColor").fillColor);
                     dateAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeXColor").fillAlpha * 0.01;
                     dateAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                    //dateAxis.renderer.line.strokeWidth = 2;
+                    dateAxis.renderer.line.stroke = am4core.color(me.getProperty("axisXColor").fillColor);
+                    dateAxis.renderer.line.strokeOpacity = me.getProperty("axisXColor").fillAlpha * 0.01;
                     // Set date label formatting (https://www.amcharts.com/docs/v4/concepts/axes/date-axis/#Setting_date_formats)
                     //dateAxis.dateFormats.setKey("day", "dd.MM.");
                     //dateAxis.dateFormats.setKey("week", "'KW'ww");
@@ -186,7 +194,7 @@
                     dateAxis.periodChangeDateFormats.setKey("day", "[bold]dd.MMM[/]");
                     dateAxis.periodChangeDateFormats.setKey("week", "[bold]'KW'ww[/]");
                     dateAxis.periodChangeDateFormats.setKey("month", "[bold]yyyy[/]");
-                    
+
                     // Data Grouping
                     // https://www.amcharts.com/docs/v4/concepts/axes/date-axis/#Enabling_grouping
                     dateAxis.groupData = (me.getProperty("enableDataGrouping") === 'true');
@@ -195,7 +203,7 @@
                                                   , {timeUnit: "week", count: 3}
                                                   , {timeUnit: "week", count: 4}
                                                   , {timeUnit: "week", count: 5}]);
-                    
+
                     // force weeks to display
                     // dateAxis.groupInterval = {timeUnit: "week", count: 1 };
 
@@ -236,7 +244,7 @@
                         dateAxis.renderer.labels.template.events.disableType("hit");
                     };
 
-                    // activate Range selector
+                    //NOTE: Range selector
                     if (me.getProperty("enableRangeSelector") === 'true') {
                         var container = document.createElement('div');
                         var rangeselect = document.createElement('div');
@@ -257,13 +265,32 @@
                         selector.container = document.getElementById("rangeselect");
                         selector.axis = dateAxis;
                         selector.inputDateFormat = "yyyy-MM-dd";
-                        selector.periods.unshift({
-                            name: "5W",
-                            interval: {
-                                timeUnit: "week",
-                                count: 5
-                            }
-                        });
+
+                        //build bottons for Range Selector based on range of dates (max-min=diff)
+                        //window.alert('diff2 = ' + diff + ' days');
+                        if (diff < 28) {
+                            selector.periods.length = 0; // empty Array
+                            selector.periods.unshift({ name: "MAX", interval: "max" });
+                            selector.periods.unshift({ name: "1W", interval: { timeUnit: "week", count: 1 }});
+                            selector.periods.unshift({ name: "3d", interval: { timeUnit: "day", count: 3 }});
+                            selector.periods.unshift({ name: "1d", interval: { timeUnit: "day", count: 1 }});
+                        } else if (diff < 210){
+                            selector.periods.length = 0; // empty Array
+                            selector.periods.unshift({ name: "MAX", interval: "max" });
+                            selector.periods.unshift({ name: "3M", interval: { timeUnit: "month", count: 3 }});
+                            selector.periods.unshift({ name: "1M", interval: { timeUnit: "month", count: 1 }});
+                            selector.periods.unshift({ name: "2W", interval: { timeUnit: "week", count: 2 }});
+                            selector.periods.unshift({ name: "1W", interval: { timeUnit: "week", count: 1 }});
+                        } else if (diff > 210) {
+                            selector.periods.length = 0; // empty Array
+                            selector.periods.unshift({ name: "MAX", interval: "max" });
+                            selector.periods.unshift({ name: "YTD", interval: "ytd" });
+                            selector.periods.unshift({ name: "1Y", interval: { timeUnit: "year", count: 1 }});
+                            selector.periods.unshift({ name: "6M", interval: { timeUnit: "month", count: 6 }});
+                            selector.periods.unshift({ name: "3M", interval: { timeUnit: "month", count: 3 }});
+                            selector.periods.unshift({ name: "1M", interval: { timeUnit: "month", count: 1 }});
+                            selector.periods.unshift({ name: "2W", interval: { timeUnit: "week", count: 2 }});
+                        }
                     };
                 };
 
@@ -287,6 +314,9 @@
                 valueAxis.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
                 valueAxis.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
                 valueAxis.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
+                //valueAxis.renderer.line.strokeWidth = 2;
+                valueAxis.renderer.line.stroke = am4core.color(me.getProperty("axisYColor").fillColor);
+                valueAxis.renderer.line.strokeOpacity = me.getProperty("axisYColor").fillAlpha * 0.01;
 
                 // Axis Metric Formatter
                 if (me.getProperty("metricFormat" + 0) !== undefined) {
@@ -309,17 +339,29 @@
                 }
 
                 //NOTE createSeries() --------------------------------//
-                function createSeries(field, name, hiddenInLegend) {
+                function createSeries(field, name, index, hiddenInLegend) {
                     var series, bullet;
-                    // extract the index i from field = "value+i"
-                    var j = Number(field.substring(field.length - 1, field.length));
-                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('104: j set' + j): 0;
+                            // extract the index i from field = "value+i"
+                            //var j = Number(field.substring(field.length - 1, field.length));
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('104: createSeries index set: ' + index): 0;
+                    //get Metric Format
+                            //er = "[#0f0]#,###.00[/]";    //er = "[/bold]#,##[/]";    //er = "€ #,###.00";
+                            //window.alert('metricFormat+j: ' + me.getProperty("metricFormat" + j) + ' // j = ' + j);
+
+                    //if (me.getProperty("metricFormat" + index) !== undefined) {
+                    if (me.getProperty("metricFormat" + index) !== undefined) {
+                        //er = me.getProperty("metricFormat" + index).replace(/'/g, "");
+                        er = me.getProperty("metricFormat" + index).replace(/'/g, "");
+                        valueYformat = "{valueY.formatNumber('" + er + "')}";
+                    } else {
+                        valueYformat = "{valueY}";
+                    }
 
                     if (AttrIsDate == 'false') {
                         (me.getProperty("showDebugMsgs") == 'true') ? window.alert('category-based AttrIsDate = ' + AttrIsDate): 0;
                         // None-Date-Block (to be executed if attribute is no date and therefore series must be created for values of attribute(Country: Italy, Germany, Spain))
                         categoryAxis.dataFields.category = "date";
-                        categoryAxis.renderer.grid.template.location = 0;
+                        categoryAxis.renderer.grid.template.location = 0 ;
 
                         var label = categoryAxis.renderer.labels.template;
                         label.wrap = true;
@@ -329,45 +371,14 @@
                         series.name = name;
                         series.dataFields.valueY = field;
                         series.dataFields.categoryX = "date";
-
-
-
-
-                        // KARINA
-                        /**
-                         * https://www.amcharts.com/docs/v4/concepts/tooltips/
-                         * https://www.amcharts.com/docs/v4/concepts/formatters/formatting-numbers/#Examples
-                         * https://www.amcharts.com/docs/v4/concepts/formatters/formatting-strings/#In_line_formatting
-                         */
-
-                        //FIXME
-                        let metricform = me.getProperty("metricFormat" + j);
-                        series.valueformat = ("'U8nit' 000.00 j=" + j);
-                        let valueformat = ("'U8nit' 000.00 j=" + j);
-                        series.tooltipText = "Testing: {name}:\n {valueY}";
-                        window.alert("metricform: " + metricform + " // J: " + j);
-                        window.alert('s.name: ' + series.name + ' J: ' + j + ' metricf: ' + me.getProperty("metricFormat" + j));
-                        //series.numberFormatter.numberFormat = ("'U8nit' 000.00 j=" + j);
-                        series.numberFormatter.numberFormat = "(" + metricform + ")";
-                        
-
-                        // Inline Formatting:
-                        //series.tooltipText = "{valueY.formatNumber('" + mform +"')} mil6es:: " + name;
-                        //series.tooltipText = "{name}:\n Testen:\n {valueY.formatNumber('###.0000')}"
-                        //window.alert("{name}:\n Testen:\n {valueY.formatNumber(" + metricform + ")}")
-
-                        //series.tooltipText = "{name}:\n {valueY.formatNumber('#.0')}";
-
-                        // KARINA
-
-
-
+                        series.tooltipText = "{name}: " + valueYformat;
 
                         //show values inside chart
                         if (me.getProperty("showItemLabels") === "true" && me.getProperty("valuesLegend") === "false") {
                             let valueLabel = series.columns.template.createChild(am4core.Label);
-                            valueLabel.text = "{valueY}";
-                            //valueLabel.text = "{valueY.formatNumber("+ me.getProperty("metricFormat" + 0)+")}"
+                            //valueLabel.text = "{valueY}";
+                            valueLabel.text = valueYformat;
+
                             //valueLabel.fontSize = 20;
                             valueLabel.align = me.getProperty("positionLabel");     // "left" | "center" | "right" | "none"
                             valueLabel.valign = me.getProperty("positionVLabel");   // "top" | "middle" | "bottom" | "none"
@@ -392,6 +403,11 @@
                         series.groupFields.valueY = me.getProperty("aggregateValues");
                         series.minBulletDistance = 15;
                         series.tooltipText = seriesToolTipFormat;
+                        //FIXME
+                        //insert metric form in Tooltip
+                        var tipParts = seriesToolTipFormat.split('{valueY}');
+                        seriesToolTipFormatted = tipParts[0] + valueYformat + tipParts[1]
+                        series.tooltipText = seriesToolTipFormatted;
 
                         bullet = series.bullets.push(new am4charts.CircleBullet());
                         bullet.circle.stroke = am4core.color("#fff");
@@ -400,15 +416,15 @@
                         (me.getProperty("showDebugMsgs") == 'true') ? window.alert('101/l.339'): 0;
                     }
 
-                    //NOTE createSeries(): Values in Legend --------------------------------//
+                    //NOTE createSeries: Values in Legend --------------------------------//
                     if (me.getProperty("valuesLegend") === "true") {
-                        //if (me.getProperty("valuesLegend")) {
                         // show values in legend
-                        series.legendSettings.itemValueText = "[bold]{valueY}[/bold]";
+                        //window.alert('metricFormat+index: ' + me.getProperty("metricFormat" + index) + ' // index = ' + index);
+                        series.legendSettings.itemValueText = "[bold]" + valueYformat + "[/bold]";
                         series.tooltip.disabled = true;
                     }
 
-                    //NOTE createSeries(): stacked or non-stacked --------------------------------//
+                    //NOTE createSeries: stacked or non-stacked --------------------------------//
                     if (me.getProperty("enableStacked") === 'true') {
                         series.stacked = true;
                     } else {
@@ -425,7 +441,7 @@
                     }
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('103: non'): 0;
 
-                    //NOTE createSeries(): combined Tooltip --------------------------------//
+                    //NOTE createSeries: combined Tooltip --------------------------------//
                     if (me.getProperty("combineTooltip") === 'true' && me.getProperty("singleTooltip") === 'true') {
                         // Set up tooltip
                         series.adapter.add("tooltipText", function (ev) {
@@ -433,6 +449,7 @@
                             chart2.series.each(function (item) {
                                 if (!item.isHidden) {
                                     text += "[" + item.stroke.hex + "]●[/] " + item.name + ": {" + item.dataFields.valueY + "}\n";
+                                    //text += "[" + item.stroke.hex + "]●[/] " + item.name + ": {" + item.dataFields.valueY + ".formatNumber('" + er + "')}\n";                                    
                                 }
                             });
                             return text;
@@ -446,10 +463,10 @@
                         series.tooltip.hiddenState.transitionDuration = 0;
                     }
 
-                    //NOTE createSeries(): Opposite Axis --------------------------------//
+                    //NOTE createSeries: Opposite Axis --------------------------------//
                     // check whether oppositeA has a true at that index, if so create opposite Axis
-                    if (oppositeA[j] == 'true') {
-                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('105 Start oppositeA[j] == true'): 0;
+                    if (oppositeA[index] == 'true') {
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('105 Start oppositeA[index] == true'): 0;
                         // Create new ValueAxis
                         var valueAxis2 = chart2.yAxes.push(new am4charts.ValueAxis());
                         valueAxis2.syncWithAxis = valueAxis;
@@ -457,7 +474,10 @@
                         valueAxis2.title.text = series.name;
                         valueAxis2.renderer.opposite = true;
                         valueAxis2.renderer.grid.template.stroke = am4core.color(me.getProperty("amountStrokeYColor").fillColor);
-                        valueAxis2.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
+                        valueAxis2.renderer.grid.template.strokeOpacity = 0;
+                        //valueAxis2.renderer.line.strokeWidth = 2;
+                        valueAxis2.renderer.line.stroke = am4core.color(me.getProperty("axisYColor").fillColor);
+                        valueAxis2.renderer.line.strokeOpacity = me.getProperty("axisYColor").fillAlpha * 0.01;
                         
                         if (me.getProperty("hideYAxisLabels") === 'true') {
                             valueAxis2.renderer.labels.template.disabled = true;
@@ -465,39 +485,13 @@
                         } else {
                             valueAxis2.renderer.labels.template.disabled = false;
                             valueAxis2.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
-                            //valueAxis2.cursorTooltipEnabled = true;
-                            valueAxis2.cursorTooltipEnabled = me.getProperty("displayXYCursorTips");
+                            valueAxis2.cursorTooltipEnabled = (me.getProperty("displayXYCursorTips") === 'true');
                         }
                         // Axis Metric Formatter
-                        if (me.getProperty("metricFormat" + j) !== undefined) {
+                        if (me.getProperty("metricFormat" + index) !== undefined) {
                             valueAxis2.numberFormatter = new am4core.NumberFormatter();
-                            valueAxis2.numberFormatter.numberFormat = me.getProperty("metricFormat" + j);
-
-
-                            // KARINA
-                            //FIXME
-                            //series.tooltipText = "{name}:\n {valueY.formatNumber(''Unit' 000.00')}";
-                            /*
-                            series.numberFormatter.numberFormat = ("'U2nit' 000.00 j="+j);
-                            chart2.series.each(function (item, index) {
-                                //window.alert('s.name: ' + series.name + ' J: ' + j + ' index: ' + index + ' metricf: ' + me.getProperty("metricFormat" + index));
-                                //item.numberFormatter.numberFormat = ("'U3nit' 000.00 j=" + j);
-                                item.numberFormatter.numberFormat = (me.getProperty("metricFormat" + index));
-                                if (index == 0) {
-                                    //window.alert('sjup')
-                                    item.numberFormatter.numberFormat = "'te3st' #.";
-                                } else {
-                                    //window.alert('sjup2')
-                                    item.numberFormatter.numberFormat = "'tizz' #.00";
-                                }
-                            });
-                            */
-                           // KARINA
+                            valueAxis2.numberFormatter.numberFormat = me.getProperty("metricFormat" + index);
                         }
-
-
-
-
 
 
                         // assign axis to current series
@@ -506,8 +500,8 @@
                        {
                         /* ownAxis
                         var valueAxis2 = chart2.yAxes.push(new am4charts.ValueAxis());
-                        //window.alert('J: ' + j + ' //oppositeA[j]: ' + oppositeA[j] + ' //ownA[j]: ' + ownA[j])
-                        if (ownA[j] == 'true') {
+                        //window.alert('index: ' + index + ' //oppositeA[index]: ' + oppositeA[index] + ' //ownA[index]: ' + ownA[index])
+                        if (ownA[index] == 'true') {
                             //window.alert('1. own')
                             // Create new ValueAxis
                             let valueAxisOwn = chart2.yAxes.push(new am4charts.ValueAxis());
@@ -519,13 +513,13 @@
                             valueAxisOwn.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
                             valueAxisOwn.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
                             // Axis Metric Formatter
-                            if (me.getProperty("metricFormat" + j) !== undefined) {
+                            if (me.getProperty("metricFormat" + index) !== undefined) {
                                 valueAxisOwn.numberFormatter = new am4core.NumberFormatter();
-                                valueAxisOwn.numberFormatter.numberFormat = me.getProperty("metricFormat" + j);
+                                valueAxisOwn.numberFormatter.numberFormat = me.getProperty("metricFormat" + index);
                             }
                             // assign axis to current series
                             series.yAxis = valueAxisOwn;
-                        //} else if (typeof (ownA[j]) == "undefined" || ownA[j] == 'false') {
+                        //} else if (typeof (ownA[index]) == "undefined" || ownA[index] == 'false') {
                         } else {
                             //window.alert('2. NOT own')
                             if (oppositeValueAxisFlag == 1) {
@@ -546,9 +540,9 @@
                                 valueAxis2.renderer.grid.template.strokeOpacity = me.getProperty("amountStrokeYColor").fillAlpha * 0.01;
                                 valueAxis2.renderer.labels.template.fill = am4core.color(me.getProperty("fontColor").fillColor);
                                 // Axis Metric Formatter
-                                if (me.getProperty("metricFormat" + j) !== undefined) {
+                                if (me.getProperty("metricFormat" + index) !== undefined) {
                                     valueAxis2.numberFormatter = new am4core.NumberFormatter();
-                                    valueAxis2.numberFormatter.numberFormat = me.getProperty("metricFormat" + j);
+                                    valueAxis2.numberFormatter.numberFormat = me.getProperty("metricFormat" + index);
                                 }
                                 // assign axis to current series
                                 series.yAxis = valueAxis2;
@@ -559,14 +553,14 @@
                         }
                         */
                        }
-                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('105: While oppositeA[j] == true'): 0;
+                        (me.getProperty("showDebugMsgs") == 'true') ? window.alert('105: While oppositeA[index] == true'): 0;
                     };
 
-                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('106: After oppositeA[j] == true'): 0;
+                    (me.getProperty("showDebugMsgs") == 'true') ? window.alert('106: After oppositeA[index] == true'): 0;
                     return series;
                     
                 };
-                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('107: After function createSeries()'): 0;
+                (me.getProperty("showDebugMsgs") == 'true') ? window.alert('107: After function createSeries'): 0;
 
                 let allSeries = [];
 
@@ -575,19 +569,20 @@
                 if (datapool.attrs.length == 1) {
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('108: no break-by'): 0;
                     datapool.cols.forEach((col, i) => {
-                        var s = createSeries("values" + i, col);
+                        var s = createSeries("values" + i, col, i);
                         allSeries.push(s);
                     })
                 // Break-By
+                //if (typeof datapool.transMetricNames != "undefined") {
                 } else if (datapool.attrs.length > 1 && datapool.cols.length == 1) {
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('109: break-by found'): 0;
                     datapool.transMetricNames.forEach((col, i) => {
-                        var s = createSeries(col, col);
+                        var s = createSeries(col, col, 0); // 0 as index for breakby as there can only be one metric on breakby
                         allSeries.push(s);
                     })
                 } else if (datapool.attrs.length > 1 && datapool.cols.length > 1) {
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('110: break-by found with too many metrics!'): 0;
-                    window.alert(datapool.attrs.length + ' Attributes and ' + datapool.cols.length + ' Metrics is too much for this Visualization to handle. Valid Combinations: \n1 (Time)Attribute and 1 to multiple Metrics \n2 (Time)Attribute and 1 Metric')
+                    window.alert(datapool.attrs.length + ' Attributes and ' + datapool.cols.length + ' Metrics is too much for this Visualization to handle. Valid Combinations: \n1 (Time)Attribute and 1 or more Metrics OR 2 (Time)Attributes and 1 Metric')
                 };
 
 
@@ -617,12 +612,26 @@
                         chart2.legend.markers.template.width = me.getProperty("sizeMarkerLegendAmount");
                         chart2.legend.markers.template.height = me.getProperty("sizeMarkerLegendAmount");
                     };
+                    if (me.getProperty("valuesLegend") === "true") {
+                        // show values in legend
+                        chart2.legend.labels.template.fill = am4core.color(me.getProperty("selectorColor").fillColor);
+                        chart2.legend.valueLabels.template.fill = am4core.color(me.getProperty("selectorColor").fillColor);
+                        chart2.legend.background.fill = am4core.color(me.getProperty("selectorBackground").fillColor);
+                        chart2.legend.align = "center";
+                    }
+                    if (me.getProperty("positionLegend") === "top" || me.getProperty("positionLegend") === "bottom") {
+                        chart2.legend.width = am4core.percent(80);
+                    }
                     
                 };
                 if (me.getProperty("displayXYCursor") === 'true') {
                     chart2.cursor = new am4charts.XYCursor();
                     chart2.cursor.lineY.disabled = (me.getProperty("hideXYCursorLines") === 'true');
                     chart2.cursor.lineX.disabled = (me.getProperty("hideXYCursorLines") === 'true');
+                    chart2.zoomOutButton.background.fill = am4core.color(me.getProperty("selectorBackground").fillColor);
+                    chart2.zoomOutButton.icon.stroke = am4core.color(me.getProperty("fontColor").fillColor);
+                    chart2.zoomOutButton.icon.strokeWidth = 2;
+                    chart2.zoomOutButton.background.states.getKey("hover").properties.fill = am4core.color("#5A5F73");
 
                     if (me.getProperty("fullWidthCursor") === 'true') {
                         if (AttrIsDate == 'false') {
@@ -703,97 +712,106 @@
                 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // ! ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // ! Visualisation as Selector
-/**
-                var label = chart2.createChild(am4core.Label);
-                label.text = "Hello world!";
-                label.fontSize = 16;
-                label.align = "center";
-                var dataraw = this.dataInterface.getRawData(mstrmojo.models.template.DataInterface.ENUM_RAW_DATA_FORMAT.TREE, {
-                    hasSelection: true
-                }).children;
+// ! NOTE: Visualisation as Selector
+// https://www.amcharts.com/docs/v4/tutorials/handling-axis-zoom-events-via-api/
+                if (me.getProperty("vizAsSelect") === 'true') {
+                    // ! Visualisation as Selector
+                    this.addUseAsFilterMenuItem();
 
-                dateAxis.events.on("startendchanged", dateAxisChanged); //invokes too many times till final zoom state
-                //dateAxis.events.on("endendchanged", dateAxisChanged); //invokes too many times till final zoom state
-                //chart2.cursor.events.on('zoomended', dateAxisChanged); //works only for zoom not for panning
-                //chart2.cursor.events.on("selectended", dateAxisChanged); //works only for zoom not for panning
+                    //For Debugging 1/4:
+                    //var label = chart2.createChild(am4core.Label);
+                    //label.fontSize = 16;
+                    //label.align = "center";
+                    var dataraw = this.dataInterface.getRawData(mstrmojo.models.template.DataInterface.ENUM_RAW_DATA_FORMAT.TREE, {
+                        hasSelection: true
+                    }).children;
 
-                function dateAxisChanged(ev) {
-                    var start = new Date(ev.target.minZoomed);
-                    var end = new Date(ev.target.maxZoomed);
-                    var findMe = new Date(2018,01,25);
-                    //console.log("New final range: " + start + " -- " + end);
-                    //window.alert("New final range: " + start + " -- " + end);
+                    // Date and DateTime-Axis as Selector:
+                    if (!(AttrIsDate === 'false')) {
+                        //dateAxis.events.on("selectionextremeschanged", dateAxisChanged); //Not fancy having two events? If you are using ValueAxis or DateAxis you can use a unified "selectionextremeschanged" event instead.
+                        dateAxis.events.on("startendchanged", dateAxisChanged); //invokes too many times till final zoom state
+                        //chart2.cursor.events.on('zoomended', dateAxisChanged); //works only for zoom not for panning
+                        //chart2.cursor.events.on("selectended", dateAxisChanged); //works only for zoom not for panning
 
-                    //Object used for the "use as a filter" functionality
-                    var selectorData = [];
-                    //selectorData.push(start);
-                    //selectorData.push(end);
-                    let attrlength = dp.getRowHeaders(0).getHeader(0).getName().length;
+                        function dateAxisChanged(ev) {
+                            var start = new Date(ev.target.minZoomed);
+                            var end = new Date(ev.target.maxZoomed);
 
-                    for (i = 0; i < attrlength; i++) {
-                        let dpdate = datapool.rows[i].date;
-                        if (+start < +dpdate && +dpdate < +end) {
-                           //        ^ serialisation steps (+); serialized dates or datetime can be easier compared than date objects. Much much easier.
-                           //selectorData.push(dpdate)
-                           //selectorData.push(datapool.rows[i].attributeSelector)
-                           selectorData.push(dataraw[i].attributeSelector)
-                           // Debugging:
+                            //Object used for the "use as a filter" functionality
+                            var selectorData = [];
+                            selectorData.length = 0; // empty Array
 
-//                           window.alert('start: ' + start.toISOString() +
-//                               ' \n dpdate: ' + dpdate.toISOString() +
-//                               ' \n end:  ' + end.toISOString());
+                            
+                            // When selecting dates, set time to 00:00:00,000. Selecting 01.Jan.2021 03:50:00 becomes 01.Jan.2021 00:00:00 and therefore includes the 01.Jan in selection Date
+                            if (AttrIsDate === "date") {
+                                start.setHours(0, 0, 0, 0);
+                            }
 
-                           
-                        } else if (+end < +dpdate) {
-                            break;
+                            let attrlength = dp.getTotalRows();
+                            for (i = 0; i < attrlength; i++) {
+                                let dpdate = datapool.rows[i].date;
+                                if (+start <= +dpdate && +dpdate <= +end) {
+                                //        ^ serialisation steps (+); serialized dates or datetime can be easier compared than date objects. Much much easier.
+                                selectorData.push(dataraw[i].attributeSelector)
+                                } else if (+end < +dpdate) {
+                                    break;
+                                }
+                            }
+
+                            //For Debugging 2/4:
+                            //label.text = "Start: " + start.toLocaleDateString('de-DE') + " t: " + start.toLocaleTimeString('de-DE') + " --//-- End: " + end.toLocaleDateString('de-DE') + " t: " + end.toLocaleTimeString('de-DE');
+
+                            // apply array to filter visualisation
+                            me.applySelection(selectorData);
+
+                            //For Debugging:
+                            //var Say1 = 'start.toISOString: ' + start.toISOString() + "\n" +
+                            //        'end.toISOString: ' + end.toISOString() + '\n';
+                            //var Say2 = 'attrlength: ' + JSON.stringify(attrlength) +
+                            //        '\n selectordata: ';
+                            //var myWindow2 = PopUp(Say1, Say2, selectorData);
+                        }
+                    // Catgory-Axis as Selector:
+                    } else if (AttrIsDate === 'false'){
+                        //window.alert('looks like Category');
+                        categoryAxis.events.on("startendchanged", categoryAxisZoomed); //invokes too many times till final zoom state
+
+                        function categoryAxisZoomed(ev) {
+                            let axis = ev.target;
+                            let start = axis.getPositionLabel(axis.start);
+                            let end = axis.getPositionLabel(axis.end);
+
+                            //Object used for the "use as a filter" functionality
+                            var selectorData = [];
+                            selectorData.length = 0; // empty Array
+
+                            let attrlength = dp.getTotalRows();
+                            for (i = 0; i < attrlength; i++) {
+                                let dpdate = datapool.rows[i].date;
+                                //window.alert('start: ' + start + '\nend: ' + end + '\ndpdate: ' + dpdate)
+                                if (start <= dpdate && dpdate <= end) {
+                                    selectorData.push(dataraw[i].attributeSelector)
+                                } else if (+end < +dpdate) {
+                                    break;
+                                }
+                            }
+
+                            //For Debugging 3/4:
+                            //label.text = "Start: " + start + " --//-- End: " + end;
+
+                            // apply array to filter visualisation
+                            me.applySelection(selectorData);
+
+                            //For Debugging 4/4:
+                            //var Say1 = 'start: ' + start +
+                            //        '\nend: ' + end;
+                            //var Say2 = 'attrlength: ' + JSON.stringify(attrlength) +
+                            //        '\nselectordata: ';
+                            //var myWindow2 = PopUp(Say1, Say2, selectorData);
                         }
                     }
-
-
-                    label.text = "Start to End: " + start.toISOString() + " -- " + end.toISOString();
-                    me.applySelection(selectorData);
-                    // apply array to filter visualisation
-                    //me.applySelection(dataraw[1].attributeSelector);
-                    //CustomVisBase.prototype.applySelection(selectorData);
-
-
-
-                var Say1 =
-                    'start.toISOString: ' + start.toISOString() + '<br>' +
-                    'findMe.toISOString: ' + findMe.toISOString() + '<br>';
-                var Say2 =
-                    '<br> attrlength: <br>' +
-                    JSON.stringify(attrlength) +
-                    '<br> selectordata: <br>' +
-                    JSON.stringify(selectorData);
-                //selectorData.join("<br>")
-                //JSON.stringify(dataraw[2].attributeSelector)
-                if (myWindow2) {
-                        myWindow2.close(); // Closes the new window // make sure only the last window remains open.
-                        window.alert('hooray.')
-                };
-                
-                var myWindow2 = PopUp(Say1, Say2);
-
-
-
-
-                } // end of function dateAxisChanged
-*/
+                }
 // ! ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -860,7 +878,6 @@
                     for (var z = 0; z < dp.getColumnHeaderCount(); z++) {
                         datapool.cols[z] = dp.getColHeaders(0).getHeader(z).getName();
                     }
-
 
                     //set rows data
                     var rows = [];
@@ -985,6 +1002,22 @@
                         //var Say2 = "datapool.transposedRows:";
                         //var myWindow2 = PopUp(Say1, Say2, datapool.transposedRows);
                     }
+
+
+                    //Difference in Dates for Range-Selector-Buttons
+                    //https://www.amcharts.com/docs/v4/tutorials/plugin-range-selector/#Predefined_periods
+                    var mindatevalue = Math.min.apply(Math, datapool.rows.map(function (o) {
+                        return o.date;
+                    }));
+                    var maxdatevalue = Math.max.apply(Math, datapool.rows.map(function (o) {
+                        return o.date;
+                    }));
+                    //alert('Mindatevalue = ' + mindatevalue);
+                    //var mindate = new Date(mindatevalue * 1000);
+                    var mindate = new Date(mindatevalue);
+                    //alert('Mindate = ' + mindate.toUTCString());
+                    var maxdate = new Date(maxdatevalue);
+                    diff = (maxdate - mindate) / (1000 * 60 * 60 * 24); //diff in days (millisec -> days)
 
 
                     //------------------ POPUP for Debugging INPUT ------------------//

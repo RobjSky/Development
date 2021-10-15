@@ -191,17 +191,12 @@
                                         labelText: "Show Selector"
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
-                                        propertyName: "enableDataGrouping",
-                                        labelText: "Enable Data Grouping"
+                                        propertyName: "hideYAxisLabels",
+                                        labelText: "Hide Y-Axis-Labels"
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
                                         propertyName: "enableClickToDrill",
                                         labelText: "Drill on Click (X-Axis)"
-                                    }, {
-                                        style: $WT.CHECKBOXANDLABEL,
-                                        disabled: this.getHost().getProperty('displayXYCursor') === "false",
-                                        propertyName: "enableWheelScroll",
-                                        labelText: "Wheel Scroll"
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
                                         disabled: this.getHost().getProperty('displayXYCursor') === "false",
@@ -214,13 +209,20 @@
                                         labelText: "combine Tooltip"
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
+                                        propertyName: "vizAsSelect",
+                                        labelText: "Visualization as Selector"
+                                    }, {
+                                        style: $WT.CHECKBOXANDLABEL,
                                         propertyName: "startAtZero",
                                         labelText: "YAxis begins with 0"
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
-                                        disabled: this.getHost().getProperty('displayXYCursor') === "false",
                                         propertyName: "enableStacked",
                                         labelText: "stacked Series"
+                                    }, {
+                                        style: $WT.CHECKBOXANDLABEL,
+                                        propertyName: "enableDataGrouping",
+                                        labelText: "Enable Data Grouping"
                                     }, {
                                         style: $WT.TWOCOLUMN,
                                         items: [{
@@ -251,6 +253,29 @@
                                                         value: "max"
                                                     }]
                                             }]
+                                    }, {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                            style: $WT.LABEL,
+                                            disabled: this.getHost().getProperty('displayXYCursor') === "false",
+                                            width: "40%",
+                                            labelText: "Wheel Scroll"
+                                        }, {
+                                            style: $WT.PULLDOWN,
+                                            disabled: this.getHost().getProperty('displayXYCursor') === "false",
+                                            width: "60%",
+                                            propertyName: "behaviorWheelScroll",
+                                            items: [{
+                                                name: "none",
+                                                value: "none"
+                                            }, {
+                                                name: "zoom",
+                                                value: "zoomX"
+                                            }, {
+                                                name: "pan",
+                                                value: "panX"
+                                            }]
+                                        }]
                                     }
                                 ]},
                                     //Show Item Labels
@@ -430,6 +455,34 @@
                                             }
                                         ]
                                     },
+                                    //Axis Lines
+                                    {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                                style: $WT.LABEL,
+                                                width: "30%",
+                                                labelText: "Axisline-X"
+                                            },
+                                            {
+                                                style: $WT.FILLGROUP,
+                                                width: "70%",
+                                                propertyName: "axisXColor",
+                                            }
+                                        ]
+                                    }, {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                                style: $WT.LABEL,
+                                                width: "30%",
+                                                labelText: "Axisline-Y"
+                                            },
+                                            {
+                                                style: $WT.FILLGROUP,
+                                                width: "70%",
+                                                propertyName: "axisYColor",
+                                            }
+                                        ]
+                                    },
                                     //Axis Font
                                     {
                                         style: $WT.TWOCOLUMN,
@@ -573,11 +626,6 @@
                                     },
                                     {
                                         style: $WT.CHECKBOXANDLABEL,
-                                        propertyName: "hideYAxisLabels",
-                                        labelText: "Hide Y-Axis-Labels"
-                                    },
-                                    {
-                                        style: $WT.CHECKBOXANDLABEL,
                                         disabled: this.getHost().getProperty('displayXYCursor') === "false",
                                         propertyName: "placeholder",
                                         labelText: "Place Holder"
@@ -628,16 +676,18 @@
                                                             value: "#,###.00"
                                                             }, {
                                                             name: "Euro",
+                                                            //value: "€ #,###.00"
                                                             value: "'€' #,###.00"
                                                             }, {
                                                             name: "Dollar",
+                                                            //value: "$ #,###.00"
                                                             value: "'$' #,###.00"
                                                             }, {
                                                             name: "Percentage (Dec)",
                                                             value: "#,###.00%"
                                                             }, {
                                                             name: "Percentage (Int)",
-                                                            value: "#,###.00'%'"
+                                                            value: "#,###.00  %"
                                                             }, {
                                                             name: "integer",
                                                             value: "#."
