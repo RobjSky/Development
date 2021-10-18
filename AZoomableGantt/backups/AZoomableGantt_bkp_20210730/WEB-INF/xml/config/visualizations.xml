@@ -1,5 +1,0 @@
-<visualizations>
-  <visualization-list name="ajax" show-in-web="true" view-mode="51">
-    <visualization attribute-minimum="1" desc="AZoomableGantt" is-mojo="true" metric-minimum="1" scope="19" style-name="AZoomableGantt" editor-model="plugins.AZoomableGantt.AZoomableGanttEditorModel" drop-zones="plugins.AZoomableGantt.AZoomableGanttDropZones" widget-type="7"/>
-  </visualization-list>
-</visualizations>

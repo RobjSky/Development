@@ -193,18 +193,61 @@
                                     {
                                         style: $WT.LABEL,
                                         labelText: "Options"
-                                    },
-                                    {
+                                    }, {
                                         style: $WT.CHECKBOXANDLABEL,
                                         propertyName: "displayXYChartScrollbar",
                                         labelText: "Show XYChartScrollbar"
-                                    },
-                                    
-                                    
-                                    {
+                                    }, {
                                         style: $WT.CHECKBOXANDLABEL,
                                         propertyName: "enableWheelScroll",
                                         labelText: "Wheel Scroll"
+                                    }, {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                            style: $WT.LABEL,
+                                            disabled: this.getHost().getProperty('displayXYCursor') === "false",
+                                            width: "40%",
+                                            labelText: "Wheel Scroll"
+                                        }, {
+                                            style: $WT.PULLDOWN,
+                                            disabled: this.getHost().getProperty('displayXYCursor') === "false",
+                                            width: "60%",
+                                            propertyName: "behaviorWheelScroll",
+                                            items: [{
+                                                name: "none",
+                                                value: "none"
+                                            }, {
+                                                name: "zoom",
+                                                value: "zoomX"
+                                            }, {
+                                                name: "pan",
+                                                value: "panX"
+                                            }]
+                                        }]
+                                    }, {
+                                        style: $WT.TWOCOLUMN,
+                                        items: [{
+                                            style: $WT.LABEL,
+                                            width: "40%",
+                                            labelText: "DateTime Format (Separator doesnt matter)"
+                                        }, {
+                                            style: $WT.PULLDOWN,
+                                            width: "60%",
+                                            propertyName: "dateTimeFormat",
+                                            items: [{
+                                                name: "dd-mm-yyyy",
+                                                value: 0
+                                            }, {
+                                                name: "mm-dd-yyyy",
+                                                value: 1
+                                            }, {
+                                                name: "yyyy-dd-mm",
+                                                value: 2
+                                            }, {
+                                                name: "yyyy-mm-dd",
+                                                value: 3
+                                            }]
+                                        }]
                                     }
                                 ]
                             },

@@ -1,4 +1,4 @@
-# Annotation Chart Visualization
+# A-Zoomable-Gantt-Chart Visualization (amCharts for Microstrategy)
 
 Visualize data over time using a line chart with annotations to provide insight into data points.  Annotation charts are interactive time series line charts with full annotations that are visible on the side of the visualization, rather than appearing in a tooltip. The annotations correspond to specific data points on the chart.  
 
@@ -26,8 +26,8 @@ The sample annotation chart below compares current customer counts with customer
   - Works as time series widget when no annotations are present
 
 
-### Initial post: 08/02/2016
-### Last changed:
+### Initial post: 06/16/2021
+### Last changed: 10/15/2021
 ### Changes made: [Change Log Details]
 
 

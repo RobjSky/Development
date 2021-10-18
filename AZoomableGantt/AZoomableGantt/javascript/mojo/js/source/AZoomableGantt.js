@@ -89,6 +89,7 @@
                     weekendFillColor: {fillColor: "#000000", fillAlpha: "20"},
                     metricFormat: "#,###.00",
                     showDebugMsgs: 'false',
+                    dateTimeFormat: 'dd-mm-yyyy'
                 });
 
                 am4core.useTheme(am4themes_animated);
@@ -105,8 +106,9 @@
 
 
                 if (me.getProperty("enableWheelScroll")) {
-                    chart2.mouseWheelBehavior = "panX";
+                    //chart2.mouseWheelBehavior = "panX";
                 };
+                chart2.mouseWheelBehavior = me.getProperty("behaviorWheelScroll"); // "panX", "zoomX", "selectX"
                 
                 // Export
                 //chart2.exporting.menu = new am4core.ExportMenu();
@@ -699,6 +701,62 @@
                         // Attribute.Values: get date from data. date needs to be in the form of dd.mm.yy(yy)
                         c.startdate = dp.getRowHeaders(i).getHeader(0).getName();
                         c.enddate = dp.getRowHeaders(i).getHeader(1).getName();
+
+                        
+                        
+                        
+                        /// NEW Approach
+                        if (i > 2) {
+                            var fragOfTime = c.startdate.split(/[\s,-/\\:]+/), // split by multiple chars ( \s = whitespace | ,-/ = Range from , to / char code 44 to char code 47 | \\ = \ | : = : | []+ = 1 or more)
+                                yyyy, mm, dd;
+                             window.alert('fragoftume: ' + fragOfTime);
+
+                            switch (me.getProperty("dateTimeFormat")) {
+                                case "dd-mm-yyyy":
+                                    yyyy = fragOfTime[2];
+                                    mm = fragOfTime[1];
+                                    dd = fragOfTime[0];
+                                    break;
+                                case "mm-dd-yyyy":
+                                    yyyy = fragOfTime[2];
+                                    mm = fragOfTime[0];
+                                    dd = fragOfTime[1];
+                                    break;
+                                case "yyyy-dd-mm":
+                                    yyyy = fragOfTime[0];
+                                    mm = fragOfTime[2];
+                                    dd = fragOfTime[1];
+                                    break;
+                                case "yyyy-mm-dd":
+                                    yyyy = fragOfTime[0];
+                                    mm = fragOfTime[1];
+                                    dd = fragOfTime[2];
+                                    break;
+                            };
+
+                            if (fragOfTime[2].length == 2) {
+                                fragOfTime[2] = '20' + fragOfTime[2];
+                            }
+
+                            //check if date (d,m,y) or datetime(d,m,y,h,m,s)
+                            if (fragOfTime.length = 3) {
+                                // Note: JavaScript counts months from 0 to 11. January is 0.
+                                // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                //c.startdate = new Date(yyyy, mm - 1, dd);
+                                //seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
+                                window.alert('NewMethod: ' + new Date(yyyy, mm - 1, dd));
+                            } else if (fragOfTime.length = 6) {
+                                //c.startdate = new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5]);
+                                //seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
+                                window.alert('NewMethod: ' + new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5]));
+                            }
+                        }
+                        /// NEW Approach
+
+
+
+
+
 
                         switch (startAttrIsDate) {
                             case "date":
