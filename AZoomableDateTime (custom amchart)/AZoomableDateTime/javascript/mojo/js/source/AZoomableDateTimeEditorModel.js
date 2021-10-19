@@ -214,7 +214,7 @@
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
                                         propertyName: "startAtZero",
-                                        labelText: "YAxis begins with 0"
+                                        labelText: "Baseline (Y=0)"
                                     }, {
                                         style: $WT.CHECKBOXANDLABEL,
                                         propertyName: "enableStacked",

@@ -31,7 +31,7 @@
             // Define the CSS class that will be appended to container div
             cssClass: "AZoomableGantt",
             // Define the error message to be displayed if JavaScript errors prevent data from being displayed
-            errorDetails: "This visualization requires one or more attributes and one metric. :::. Expected Date-Format: [dd.mm.yy(yy)]. Expected DateTime-Format: [dd.mm.yy(yy) hh:mm:ss] .:::",
+            errorDetails: "This visualization requires one or more attributes and one metric. :::. Expected Date-Format: [dd.MM.yy(yy)]. Expected DateTime-Format: [dd.MM.yy(yy) HH:mm:ss] .:::",
             // Define the external libraries to be used - in this sample. the amcharts library
             externalLibraries: [{url: "//cdn.amcharts.com/lib/4/core.js"}, {url: "//cdn.amcharts.com/lib/4/charts.js"}, {url: "//cdn.amcharts.com/lib/4/themes/animated.js"}, {url: "//cdn.amcharts.com/lib/4/plugins/rangeSelector.js"}],
             // Define whether a tooltip should be displayed with additional information
@@ -52,6 +52,8 @@
                      dp = this.dataInterface;
                 var startAttrIsDate = "false";
                 var AttrCount = 0;
+                var formattedDateTime;
+                var valDateXFormatted;
 
                 // ! Visualisation as Selector
                 this.addUseAsFilterMenuItem();
@@ -89,7 +91,7 @@
                     weekendFillColor: {fillColor: "#000000", fillAlpha: "20"},
                     metricFormat: "#,###.00",
                     showDebugMsgs: 'false',
-                    dateTimeFormat: 'dd-mm-yyyy'
+                    dateTimeFormat: "dd-mm-yyyy"
                 });
 
                 am4core.useTheme(am4themes_animated);
@@ -98,16 +100,12 @@
                 var chart2 = am4core.create(this.domNode, am4charts.XYChart);
                 chart2.padding(10, 10, 10, 10);
                 chart2.hiddenState.properties.opacity = 0; // this creates initial fade-in
-                chart2.dateFormatter.dateFormat = "yyyy-MM-dd hh:mm";
+                chart2.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm";
                 chart2.dateFormatter.inputDateFormat = "yyyy-MM-dd HH:mm";
 
                 var colorSet = new am4core.ColorSet();
                 colorSet.saturation = 0.4;
 
-
-                if (me.getProperty("enableWheelScroll")) {
-                    //chart2.mouseWheelBehavior = "panX";
-                };
                 chart2.mouseWheelBehavior = me.getProperty("behaviorWheelScroll"); // "panX", "zoomX", "selectX"
                 
                 // Export
@@ -124,14 +122,15 @@
                 }
                 chart2.data = datapool.rows;
 
+/* FIXME DELETE ME
                 if (startAttrIsDate == "datetime") {
-                    var formattedDateTime = 'dd.MM.yyyy /+/ hh:mm';
+                    var formattedDateTime = 'dd.MM.yyyy HH:mm';
                     var valDateXFormatted = 'HH:mm';
                 } else if (startAttrIsDate == "date") {
                     var formattedDateTime = 'dd.MM.yyyy';
                     var valDateXFormatted = 'dd.MM.yyyy';
                 }
-
+*/
 
 
                 // Set Default Colors
@@ -228,8 +227,12 @@
                     let push = "\n" + datapool.cols[i] + ": {" + myVar + "}";
                     metrics4tooltip += push;
                 };
+                //FIXME
                 if (me.getProperty("showToolTip") === 'true') {
-                    series1.columns.template.tooltipText = "[bold]{" + datapool.attrs[3] + "}[/]: \n{openDateX.formatDate(formattedDateTime)} - {dateX.formatDate(valDateXFormatted)}" + metrics4tooltip;
+                    //series1.columns.template.tooltipText = "just testing. [bold]{" + datapool.attrs[3] + "}[/]: \n{openDateX.formatDate(formattedDateTime)} - {dateX.formatDate(valDateXFormatted)}" + metrics4tooltip;
+                    //series1.columns.template.tooltipText = "just testing2. [bold]{" + datapool.attrs[3] + "}[/]: \n{openDateX} - {dateX}" + metrics4tooltip;
+                    //series1.columns.template.tooltipText =   "3: [bold]{" + datapool.attrs[3] + "}[/]: \n" + seriesToolTipFormat + metrics4tooltip;
+                    series1.columns.template.tooltipText = "{categoryY}\n[bold]{task}[/]: \n" + seriesToolTipFormat + metrics4tooltip;
                 }
 
 
@@ -416,7 +419,7 @@
                         txtOpenDateX.marginRight = 5;
                         txtOpenDateX.paddingBottom = 3;
                         //valOpenDateX.text = "dd.MM.yyyy HH:mm";
-                        valOpenDateX.text = formattedDateTime;
+                        //valOpenDateX.text = formattedDateTime;    //is this needed?
                         valOpenDateX.minWidth = minTextWidth;
                         valOpenDateX.marginRight = 10;
                         valOpenDateX.fontWeight = "bolder";
@@ -501,13 +504,10 @@
                             img.href = imgPrefix + imgName + imgSuffix;
                             // Update labels in Infobox
                             title.text = "[bold]" + ev.target.dataItem.task + "[/]\n";
-                            //valOpenDateX.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, "dd.MM.yyyy HH:mm");
                             valOpenDateX.text = chart2.dateFormatter.format(ev.target.dataItem.openDateX, formattedDateTime);
                             valDateX.text = chart2.dateFormatter.format(ev.target.dataItem.dateX, valDateXFormatted);
                             valCategoryY.text = ev.target.dataItem.categoryY;
-                            //valCategoryY.text = chart2.numberFormatter.format(ev.target.dataItem.valueY, "#,###.00");
                             for (var i = 0; i < numOfMetrics; i++) {
-                                 //var metricname = "valueY" + i;
                                  var metricname = "valueY" + i;
                                  window['valMetric' + i].text = ev.target.dataItem[metricname];
                             }
@@ -625,7 +625,7 @@
                     var rows = [];
 
 
-                    // DATETIME: if date then (Input dd.mm.yy)
+                    // DATETIME: if date then (Input dd.MM.yy)
                     let startAttrLength = dp.getRowHeaders(0).getHeader(0).getName().length;
                     let endAttrLength = dp.getRowHeaders(0).getHeader(1).getName().length;
                     let startDigitsCount;
@@ -648,19 +648,19 @@
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('startDigitsCount: ' + startDigitsCount): 0;
 
                     switch (startAttrLength - startDigitsCount) {
-                        //Date: if attribute has length - digitcount = 2 then we assume a date ([dd.mm.yy] or [dd.mm.yyyy] = 2)
+                        //Date: if attribute has length - digitcount = 2 then we assume a date ([dd.MM.yy] or [dd.MM.yyyy] = 2)
                         case 2:
                             startAttrIsDate = "date";
                             AttrCount = 1;
                             break;
-                        //Time: if attribute has length - digitcount = 3 then we assume a time ([hh:mm:ss] or [hh:mm:ss] = 3)
+                        //Time: if attribute has length - digitcount = 3 then we assume a time ([HH:mm:ss] or [HH:mm:ss] = 3)
                         /*
                         case 3:
                             startAttrIsDate = "time";
                             AttrCount = 1;
                             break;
                         */
-                        //Datetime: if attribute has length(19) - digitcount(14) = 5 then we assume a datetime ([dd.mm.yy hh:mm:ss] or [dd.mm.yyyy hh:mm:ss] = 5)
+                        //Datetime: if attribute has length(19) - digitcount(14) = 5 then we assume a datetime ([dd.MM.yy HH:mm:ss] or [dd.MM.yyyy HH:mm:ss] = 5)
                         case 5:
                             startAttrIsDate = "datetime";
                             AttrCount = 1;
@@ -698,18 +698,24 @@
                     //go thru all rows
                     for (i = 0; i < dp.getTotalRows(); i++) {
                         var c = {}
-                        // Attribute.Values: get date from data. date needs to be in the form of dd.mm.yy(yy)
+                        // Attribute.Values: get date from data. date needs to be in the form of dd.MM.yy(yy)
                         c.startdate = dp.getRowHeaders(i).getHeader(0).getName();
                         c.enddate = dp.getRowHeaders(i).getHeader(1).getName();
 
-                        
-                        
-                        
+
+
                         /// NEW Approach
-                        if (i > 2) {
-                            var fragOfTime = c.startdate.split(/[\s,-/\\:]+/), // split by multiple chars ( \s = whitespace | ,-/ = Range from , to / char code 44 to char code 47 | \\ = \ | : = : | []+ = 1 or more)
+                        c.startdate = createDateTime(c.startdate);
+                        c.enddate = createDateTime(c.enddate);
+
+                        function createDateTime (conv2Date) {
+                        //if (startAttrIsDate === "datetime") {
+                            //(i < 1) ? window.alert('conv2date b4: ' + conv2Date): 0;
+                            //(i < 1) ? window.alert('format b4: ' + me.getProperty("dateTimeFormat")): 0;
+                            
+                            var fragOfTime = conv2Date.split(/[\s,-/\\:]+/), // split by multiple chars ( \s = whitespace | ,-/ = Range from , to / char code 44 to char code 47 | \\ = \ | : = : | []+ = 1 or more)
                                 yyyy, mm, dd;
-                             window.alert('fragoftume: ' + fragOfTime);
+                            //window.alert('fragoftume: ' + fragOfTime);
 
                             switch (me.getProperty("dateTimeFormat")) {
                                 case "dd-mm-yyyy":
@@ -737,27 +743,83 @@
                             if (fragOfTime[2].length == 2) {
                                 fragOfTime[2] = '20' + fragOfTime[2];
                             }
+                            //(i < 1) ? window.alert('y: ' + yyyy + ' _m: ' + mm + ' _d: ' + dd + '\nh: ' + fragOfTime[3] + ' : min: ' + fragOfTime[4]): 0;
+
+                            // FIXME needed:??? formattedDateTime AND valDateXFormatted
+                            //check if date (d,m,y) or datetime(d,m,y,h,m,s)
+                            if (fragOfTime.length === 3) {
+                                // Note: JavaScript counts months from 0 to 11. January is 0.
+                                // convert to Datetime-Format yyyy-mm-ddTHH:mm:ss.000Z
+                                conv2Date = new Date(yyyy, mm - 1, dd);
+                                seriesToolTipFormat = "{openDateX.formatDate('dd.MM.yyyy')} - {dateX.formatDate('dd.MM.yyyy ')}";
+                                formattedDateTime = 'dd.MM.yyyy'; //formatStartDatetime
+                                valDateXFormatted = 'dd.MM.yyyy'; //formatEndDatetime
+                                //(i < 1) ? window.alert('NewDate: ' + new Date(yyyy, mm - 1, dd)): 0;
+                            } else if (fragOfTime.length === 6) {
+                                conv2Date = new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5]);
+                                seriesToolTipFormat = "{openDateX.formatDate('dd.MM.yyyy HH:mm')} - {dateX.formatDate('HH:mm')}";
+                                formattedDateTime = 'dd.MM.yyyy HH:mm';
+                                valDateXFormatted = 'HH:mm';
+                                //(i < 1) ? window.alert('NewDateTime: ' + new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5])): 0;
+                            }
+                            //(i < 1) ? window.alert('conv2date after: ' + conv2Date): 0;
+                            return conv2Date;
+                        }
+
+                        /* if (startAttrIsDate === "datetime") {
+                            var fragOfTime = c.startdate.split(/[\s,-/\\:]+/), // split by multiple chars ( \s = whitespace | ,-/ = Range from , to / char code 44 to char code 47 | \\ = \ | : = : | []+ = 1 or more)
+                                yyyy, mm, dd;
+                             //window.alert('fragoftume: ' + fragOfTime);
+
+                            switch (me.getProperty("dateTimeFormat")) {
+                                case "dd-mm-yyyy":
+                                    yyyy = fragOfTime[2];
+                                    mm = fragOfTime[1];
+                                    dd = fragOfTime[0];
+                                    break;
+                                case "mm-dd-yyyy":
+                                    yyyy = fragOfTime[2];
+                                    mm = fragOfTime[0];
+                                    dd = fragOfTime[1];
+                                    break;
+                                case "yyyy-dd-mm":
+                                    yyyy = fragOfTime[0];
+                                    mm = fragOfTime[2];
+                                    dd = fragOfTime[1];
+                                    break;
+                                case "yyyy-mm-dd":
+                                    yyyy = fragOfTime[0];
+                                    mm = fragOfTime[1];
+                                    dd = fragOfTime[2];
+                                    break;
+                            };
+
+                            if (fragOfTime[2].length == 2) {
+                                fragOfTime[2] = '20' + fragOfTime[2];
+                            }
+                            (i < 1) ? window.alert('y: ' + yyyy + ' _m: ' + mm + ' _d: ' + dd + '\nh: ' + fragOfTime[3] + ' : min: ' + fragOfTime[4]): 0;
+                            
 
                             //check if date (d,m,y) or datetime(d,m,y,h,m,s)
-                            if (fragOfTime.length = 3) {
+                            if (fragOfTime.length === 3) {
                                 // Note: JavaScript counts months from 0 to 11. January is 0.
-                                // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
-                                //c.startdate = new Date(yyyy, mm - 1, dd);
-                                //seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
-                                window.alert('NewMethod: ' + new Date(yyyy, mm - 1, dd));
-                            } else if (fragOfTime.length = 6) {
-                                //c.startdate = new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5]);
-                                //seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
-                                window.alert('NewMethod: ' + new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5]));
+                                // convert to Datetime-Format yyyy-mm-ddTHH:mm:ss.000Z
+                                c.startdate = new Date(yyyy, mm - 1, dd);
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
+                                (i < 1) ? window.alert('NewDate: ' + new Date(yyyy, mm - 1, dd)): 0;
+                            } else if (fragOfTime.length === 6) {
+                                c.startdate = new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5]);
+                                seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy HH:mm')}: {name}: [bold]{valueY}[/]";
+                                (i < 1) ? window.alert('NewDateTime: ' + new Date(yyyy, mm - 1, dd, fragOfTime[3], fragOfTime[4], fragOfTime[5])): 0;
                             }
-                        }
+                        } */
                         /// NEW Approach
 
 
 
 
 
-
+/*
                         switch (startAttrIsDate) {
                             case "date":
                                 if (c.startdate.indexOf('.') > -1) {
@@ -765,7 +827,7 @@
                                     if (parts[2].length == 2) {
                                         parts[2] = '20' + parts[2];
                                     }
-                                    // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                    // convert to Datetime-Format yyyy-mm-ddTHH:mm:ss.000Z
                                     c.startdate = new Date(parts[2], parts[1] - 1, parts[0]);
                                 } else if (c.startdate.indexOf('/') > -1) {
                                     var parts = c.startdate.split('/');
@@ -773,7 +835,7 @@
                                         parts[2] = '20' + parts[2];
                                     }
                                     // Note: JavaScript counts months from 0 to 11. January is 0. December is 11.
-                                    // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                    // convert to Datetime-Format yyyy-mm-ddTHH:mm:ss.000Z
                                     c.startdate = new Date(parts[2], parts[0] - 1, parts[1]);
                                 }
                                 seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
@@ -799,11 +861,12 @@
                                 break;
                             default:
                                 if (i < 2) {
-                                    window.alert('default (' + i + '): Doesn´t look like a date to me. \nstartdate = ' + c.startdate + '\nExpected Date-Format: [dd.mm.yy(yy)].\nExpected DateTime-Format: [dd.mm.yy(yy) hh:mm:ss]');
+                                    window.alert('default (' + i + '): Doesn´t look like a date to me. \nstartdate = ' + c.startdate + '\nExpected Date-Format: [dd.MM.yy(yy)].\nExpected DateTime-Format: [dd.MM.yy(yy) HH:mm:ss]');
                                 }
                                 //i = dp.getTotalRows();
                                 break;
                         };
+
                         switch (endAttrIsDate) {
                             case "date":
                                 if (c.enddate.indexOf('.') > -1) {
@@ -811,7 +874,7 @@
                                     if (parts[2].length == 2) {
                                         parts[2] = '20' + parts[2];
                                     }
-                                    // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                    // convert to Datetime-Format yyyy-mm-ddTHH:mm:ss.000Z
                                     c.enddate = new Date(parts[2], parts[1] - 1, parts[0]);
                                 } else if (c.enddate.indexOf('/') > -1) {
                                     var parts = c.enddate.split('/');
@@ -819,7 +882,7 @@
                                         parts[2] = '20' + parts[2];
                                     }
                                     // Note: JavaScript counts months from 0 to 11. January is 0. December is 11.
-                                    // convert to Datetime-Format yyyy-mm-ddThh:mm:ss.000Z
+                                    // convert to Datetime-Format yyyy-mm-ddTHH:mm:ss.000Z
                                     c.enddate = new Date(parts[2], parts[0] - 1, parts[1]);
                                 }
                                 seriesToolTipFormat = "{dateX.formatDate('dd.MM.yyyy ')}: {name}: [bold]{valueY}[/]";
@@ -836,12 +899,12 @@
                                 break;
                             default:
                                 if (i < 2) {
-                                    window.alert('default (' + i + '): Doesn´t look like a date to me. \nenddate = ' + c.enddate + '\nExpected Date-Format: [dd.mm.yy(yy)].\nExpected DateTime-Format: [dd.mm.yy(yy) hh:mm:ss]');
+                                    window.alert('default (' + i + '): Doesn´t look like a date to me. \nenddate = ' + c.enddate + '\nExpected Date-Format: [dd.MM.yy(yy)].\nExpected DateTime-Format: [dd.MM.yy(yy) HH:mm:ss]');
                                 }
                                 //i = dp.getTotalRows();
                                 break;
                         };
-
+*/
                         // Rename the columnheader for startdatetime and enddatetime (eg: c.startdate --> actual attribute name)
                         c[dp.getRowTitles(0).getTitle(0).getName()] = c.startdate;
                         c[dp.getRowTitles(0).getTitle(1).getName()] = c.enddate;
@@ -864,7 +927,7 @@
                             //getMetricValue formatted
                             c[dp.getColHeaders(0).getHeader(z).getName()] = dp.getMetricValue(i, z).getValue()
                         }
-                        // push c to current position in rows-Array. Meaning c.startdate, c.enddate and c.values, resulting in {"date" : "yyyy-mm-ddThh:mm:ss.000Z" , "values" : 123 , "values0" : 456}
+                        // push c to current position in rows-Array. Meaning c.startdate, c.enddate and c.values, resulting in {"date" : "yyyy-mm-ddTHH:mm:ss.000Z" , "values" : 123 , "values0" : 456}
                         rows[i] = c;
                     };
                     (me.getProperty("showDebugMsgs") == 'true') ? window.alert('new after c.startdate: ' + JSON.stringify(rows[0].DateTime)): 0;

@@ -198,10 +198,6 @@
                                         propertyName: "displayXYChartScrollbar",
                                         labelText: "Show XYChartScrollbar"
                                     }, {
-                                        style: $WT.CHECKBOXANDLABEL,
-                                        propertyName: "enableWheelScroll",
-                                        labelText: "Wheel Scroll"
-                                    }, {
                                         style: $WT.TWOCOLUMN,
                                         items: [{
                                             style: $WT.LABEL,
@@ -236,16 +232,16 @@
                                             propertyName: "dateTimeFormat",
                                             items: [{
                                                 name: "dd-mm-yyyy",
-                                                value: 0
+                                                value: "dd-mm-yyyy"
                                             }, {
                                                 name: "mm-dd-yyyy",
-                                                value: 1
+                                                value: "mm-dd-yyyy"
                                             }, {
                                                 name: "yyyy-dd-mm",
-                                                value: 2
+                                                value: "yyyy-dd-mm"
                                             }, {
                                                 name: "yyyy-mm-dd",
-                                                value: 3
+                                                value: "yyyy-mm-dd"
                                             }]
                                         }]
                                     }
