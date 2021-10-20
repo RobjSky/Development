@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap');
+/* lighter, normal, bold */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+:root {
+    --IMGwidth: 2;
+    --KPIwidth: 8;
+}
+
+.material-icons {
+    font-size: 4vh;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    position: fixed;
+}
+
+#chartdiv {
+    height: 95%;
+    /* make it full height*/
+    max-height: 100%;
+    width: 98%;
+    max-width: 100%;
+    border-style: solid;
+    border-width: 4px;
+    border-color: green;
+    align-items: stretch;
+    padding: 2px;
+    /* Padding lieber hier rein, sonst macht height:100% Probleme */
+}
+
+div#contai {
+    /*border-style: solid;
+    border-width: 4px;
+    border-color: green;*/
+    font-family: 'Roboto', sans-serif;
+    list-style: none;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row no-wrap;
+    flex-flow: row no-wrap;
+    justify-content: space-around;
+    align-items: stretch;
+    height: 100%;
+    /* 100%; Höhe voll ausnutzen*/
+}
+
+#flex-topbar {
+    list-style: none;
+    margin: 0px 0px 0px 0px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    justify-content: space-around;
+    flex: var(--KPIwidth);
+    /* 9:10 der Breite für die Cards, 1:10 für das Bild*/
+}
+
+.topbar-item1 {
+    /*background: orange;*/
+    margin: 0px 5px 0px 5px;
+    width: 100%;
+    /*margin-left: 0px;*/
+    border-style: solid;
+    border-width: 1px;
+    border-color: gray;
+    /*line-height: 100px;*/
+    color: black;
+    font-size: calc(6px + 5vw);
+    /* the static part of calc() defines the minimum. Even though the dynamic part might shrink to something near 0. */
+    text-align: center;
+}
+
+.flex-subscontainer {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row no-wrap;
+    justify-content: space-around;
+    align-items: stretch;
+    flex: var(--IMGwidth);
+    /* Soll mitwachsen (flex: 1 ist das gleiche wie flex-grow: 1)*/
+}
+
+.flex-subsitem1 {
+    background: tomato;
+    width: 100%;
+    /*height: 100px;*/
+    margin: 5px 5px 0px 5px;
+    /*line-height: 100px;*/
+    color: white;
+    /*font-size: 3em;*/
+    text-align: center;
+    align-items: stretch;
+}
+
+.card {
+    padding: 0px 0px;
+    /*box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2);*/
+    transition: 0.3s;
+    border-radius: 2px;
+    /*align-self: stretch;*/
+    /*align-content: space-around;*/
+    /*align-items: stretch;*/
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    transform: scale(1.03);
+}
+
+.KPIName {
+    /* growth = width*/
+    /*font-size:calc(10px + 1vw);*/
+    /* growth = height*/
+    font-size: calc(16px + 1vh);
+    font-weight: normal;
+    line-height: 90%;
+    /*display: block;*/
+    text-align: left;
+    /*padding: 5px 5px 5px 5px;*/
+    padding: 0.5em;
+    /* border-style: solid; border-width: 4px; border-color: green;*/
+}
+
+.KPIValue {
+    /* growth = width*/
+    /*font-size:calc(10px + 3vw);*/
+    /* growth = height*/
+    font-size: calc(36px + 3vh);
+    font-weight: bold;
+    /*display: block;*/
+    font-weight: bold;
+    line-height: 95%;
+    padding: 0.1em;
+}
+
+.KPITxt {
+    /* growth = width*/
+    /*font-size:calc(10px + 1vw);*/
+    /* growth = height*/
+    font-size: calc(16px + 1vh);
+    font-weight: normal;
+    line-height: 90%;
+    color: #9E9E9E;
+    text-align: left;
+    padding: 0.3em 0.5em 0.3em 0.5em;
+}
+
+hr.style-two {
+    border: 0;
+    margin: 4px 0px 0px 0px;
+    height: 1px;
+    width: 85%;
+    text-align: left;
+}
+
+.coverimage {
+    border-radius: 5px 5px 5px 5px;
+    display: flex;
+    flex-grow: 1;
+    margin: auto;
+    /*width: 120px; /* Feste Größe verhindert, dass das Bild mit größer wird*/
+    /*height: 150px;*/
+    max-width: 100%;
+    /* Breite max. ausnutzen, Höhe entsprechend anpassen (kann aber sein, dass die Höhe nicht ausreicht, dann müsste man das Bild strecken, was aber nicht so gut aussieht)*/
+    max-height: 100%;
+    height: auto;
+}
+
+.overlay {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background-color: #008CBA;
+    overflow: hidden;
+    width: 100%;
+    height: 0;
+    transition: .5s ease;
+}
+
+.imgContainer {
+    position: relative;
+    align-self: center;
+    flex: var(--IMGwidth);
+    /* Soll mitwachsen. 9 für die Cards, 1 für das Bild.*/
+    max-height: 100%;
+}
+
+.imgContainer:hover .overlay {
+    bottom: 0;
+    height: 100%;
+}
+
+.imgText {
+    white-space: nowrap;
+    color: white;
+    font-size: 20px;
+    position: absolute;
+    overflow: hidden;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+}

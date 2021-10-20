@@ -1,0 +1,9 @@
+Dateien zu ändern:
+Namensänderung des Plugins:
+Replace MstrVisECharts mit neuem Namen:
+
+\javascript\mojo\js\source\EVBarChart.js
+
+\style\Html5ViPage.css
+
+\WEB-INF\xml\styleCatalog.xml
